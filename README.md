@@ -159,3 +159,4 @@ not your main password, if using Gmail) in `.env`.
 - Move the JWT secret/DB password out of source control entirely (already
   gitignored via `.env`, just don't commit real secrets).
 - Add refresh tokens if you want sessions to last beyond `JWT_ACCESS_TOKEN_EXPIRES`.
+# this is for teting parpaase
