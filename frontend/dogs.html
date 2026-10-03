@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Dogs</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header id="topbar"></header>
+
+<main class="container">
+  <div class="page-header">
+    <div>
+      <a href="home.html" class="back-link">← Back to Home</a>
+      <h1>Choose Your New Best Friend 🐶</h1>
+    </div>
+  </div>
+
+  <div id="dogs-grid" class="grid">
+    <div class="spinner"></div>
+  </div>
+</main>
+
+<!-- Buy Now modal -->
+<div class="modal-overlay" id="buy-modal" style="display:none;">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeBuyModal()">&times;</span>
+    <h2>Delivery Details</h2>
+    <form id="buy-form">
+      <div class="form-group"><label>Full Name</label><input id="bf-name" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone Number</label><input id="bf-phone" placeholder="10-digit number" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="bf-email" placeholder="Optional, for order updates"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>House/Flat No.</label><input id="bf-house" required></div>
+        <div class="form-group"><label>Street</label><input id="bf-street" required></div>
+      </div>
+      <div class="form-group"><label>Area</label><input id="bf-area" required></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <select id="bf-city" required></select>
+        </div>
+        <div class="form-group"><label>State</label><input id="bf-state" value="Karnataka" disabled></div>
+      </div>
+      <div class="form-group"><label>PIN Code</label><input id="bf-pincode" placeholder="e.g. 560001" maxlength="6" required></div>
+      <hr style="border:none; border-top:2px dashed #f0e4d8; margin:16px 0;">
+      <div id="bf-payment"></div>
+      <p class="error-text" id="buy-error"></p>
+      <button class="btn btn-primary btn-block" type="submit">Confirm Purchase</button>
+    </form>
+  </div>
+</div>
+
+<footer>🐾 PetWorld — Every breed, vet-checked and vaccinated.</footer>
+
+<script src="js/api.js?v=3"></script>
+<script src="js/dogs.js?v=4"></script>
+<script>
+  document.getElementById("bf-city").innerHTML = karnatakaCityOptionsHTML();
+  document.getElementById("bf-payment").innerHTML = paymentSectionHTML("bf-payment");
+</script>
+</body>
+</html>

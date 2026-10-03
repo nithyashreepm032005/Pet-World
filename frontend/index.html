@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Login</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Shown only if a session already exists, so a customer or admin can
+     cleanly switch accounts instead of being silently redirected away. -->
+<div class="auth-wrapper" id="already-logged-in-view" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">🐾 PetWorld</div>
+    <p class="auth-tagline" id="already-logged-in-text">You're already logged in.</p>
+    <button class="btn btn-primary btn-block" id="continue-btn" style="margin-bottom:10px;">Continue</button>
+    <button class="btn btn-outline btn-block" id="switch-account-btn">🔁 Log in as a different account</button>
+  </div>
+</div>
+
+<div class="auth-wrapper" id="login-view" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">🐾 PetWorld</div>
+    <p class="auth-tagline">Your pet's favourite online store</p>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="user_id">User ID</label>
+        <input type="text" id="user_id" placeholder="e.g. PW-7K2H9Q" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="8 characters" required autocomplete="current-password">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">👁️</button>
+        </div>
+      </div>
+      <div class="auth-links">
+        <a href="resend-user-id.html">Forgot User ID?</a>
+        <a href="forgot-password.html">Forgot Password?</a>
+      </div>
+      <p class="error-text" id="login-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Login</button>
+    </form>
+
+    <div class="auth-switch">
+      New to PetWorld? <a href="register.html">Register here</a>
+    </div>
+    <p class="helper-text" style="text-align:center; margin-top:14px;">
+      Customers and PetWorld administrators both log in here, with their own User ID and password.
+    </p>
+  </div>
+</div>
+
+<!-- Welcome screen: shown for exactly 3 seconds after successful login -->
+<div class="welcome-screen" id="welcome-screen" style="display:none;">
+  <div class="welcome-text">WELCOME TO PETWORLD</div>
+</div>
+
+<script src="js/api.js?v=3"></script>
+<script>
+  const existingUser = getUser();
+
+  // If a session already exists, offer a choice instead of silently
+  // redirecting - this is what lets someone switch from a customer
+  // account to an admin login (or vice versa) without extra clicks.
+  if (getToken() && existingUser) {
+    document.getElementById("already-logged-in-view").style.display = "flex";
+    document.getElementById("already-logged-in-text").textContent =
+      `You're logged in as ${existingUser.full_name || existingUser.user_id} (${existingUser.role}).`;
+
+    document.getElementById("continue-btn").addEventListener("click", () => {
+      window.location.href = existingUser.role === "admin" ? "admin.html" : "home.html";
+    });
+    document.getElementById("switch-account-btn").addEventListener("click", () => {
+      clearSession();
+      document.getElementById("already-logged-in-view").style.display = "none";
+      document.getElementById("login-view").style.display = "flex";
+    });
+  } else {
+    document.getElementById("login-view").style.display = "flex";
+  }
+
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("login-error");
+    const btn = document.getElementById("login-btn");
+    errorEl.textContent = "";
+
+    const user_id = document.getElementById("user_id").value.trim();
+    const password = document.getElementById("password").value;
+
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
+
+    try {
+      const data = await api("/auth/login", {
+        method: "POST",
+        auth: false,
+        body: { user_id, password },
+      });
+      setSession(data.token, data.user);
+
+      // Show the exact "WELCOME TO PETWORLD" screen for 3 seconds, then redirect.
+      document.getElementById("login-view").style.display = "none";
+      document.getElementById("welcome-screen").style.display = "flex";
+      setTimeout(() => {
+        window.location.href = data.user.role === "admin" ? "admin.html" : "home.html";
+      }, 3000);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      btn.disabled = false;
+      btn.textContent = "Login";
+    }
+  });
+</script>
+</body>
+</html>

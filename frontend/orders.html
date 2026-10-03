@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — My Orders</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header id="topbar"></header>
+
+<main class="container">
+  <div class="page-header">
+    <div>
+      <a href="account.html" class="back-link">← Back to Account</a>
+      <h1>My Orders 📦</h1>
+    </div>
+  </div>
+  <div id="orders-list">
+    <div class="spinner"></div>
+  </div>
+</main>
+
+<!-- Return request modal -->
+<div class="modal-overlay" id="return-modal" style="display:none;">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeReturnModal()">&times;</span>
+    <h2>Request a Return</h2>
+    <p class="helper-text" style="margin-bottom:14px;">Tell us briefly why you'd like to return this order.</p>
+    <div class="form-group">
+      <textarea id="return-reason" rows="3" placeholder="e.g. Received the wrong item, product was damaged, etc."></textarea>
+    </div>
+    <p class="error-text" id="return-error"></p>
+    <button class="btn btn-primary btn-block" onclick="submitReturn()">Submit Return Request</button>
+  </div>
+</div>
+
+<footer>🐾 PetWorld — Track every order, right here.</footer>
+
+<script src="js/api.js?v=3"></script>
+<script src="js/orders.js?v=2"></script>
+</body>
+</html>

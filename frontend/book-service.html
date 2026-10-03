@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Book a Service</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  .mode-toggle { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; }
+  .mode-btn { border:2px solid #f0e4d8; background:#fff; border-radius:18px; padding:18px; text-align:left;
+              cursor:pointer; transition:all .25s ease; font-family:inherit; color:var(--text-dark); }
+  .mode-btn:hover { transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+  .mode-btn.active { border-color:var(--primary); background:#fff3ea; box-shadow:var(--shadow-sm); }
+  .mode-btn .big { font-size:28px; }
+  .mode-btn h3 { font-size:16px; margin:6px 0 2px; }
+  .mode-btn p { font-size:12px; color:var(--text-muted); }
+  .panel { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:24px; }
+  #map { height:340px; border-radius:16px; margin:12px 0; z-index:0; }
+  .emoji-marker { font-size:30px; line-height:34px; text-align:center; background:none; border:none; }
+  .loc-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+  .loc-status { font-size:13px; font-weight:600; margin:6px 0 12px; min-height:20px; }
+  .loc-status.ok { color:var(--success); }
+  .loc-status.err { color:var(--danger); }
+  .loc-status.wait { color:var(--text-muted); }
+  .note { font-size:12px; color:var(--text-muted); margin-top:8px; }
+  @media (max-width:600px){ .mode-toggle{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<header id="topbar"></header>
+
+<main class="container">
+  <div class="page-header">
+    <div>
+      <a href="services.html" class="back-link">← Back to Services</a>
+      <h1 id="page-title">Book a Service</h1>
+    </div>
+  </div>
+
+  <div class="cart-layout">
+    <div>
+      <!-- Step 1: mode -->
+      <div class="mode-toggle">
+        <button type="button" class="mode-btn active" id="mode-store" onclick="setMode('store')">
+          <div class="big">🏪</div><h3>Store Service</h3>
+          <p>Book in advance and bring your pet to our PetWorld store.</p>
+        </button>
+        <button type="button" class="mode-btn" id="mode-home" onclick="setMode('home')">
+          <div class="big">🏠</div><h3>Home Service</h3>
+          <p>Our professional visits your home. Bengaluru only.</p>
+        </button>
+      </div>
+
+      <div class="panel">
+        <!-- Home only: location -->
+        <div id="home-section" style="display:none;">
+          <h3 style="margin-bottom:6px;">📍 Your Location</h3>
+          <div class="loc-buttons">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-gps" onclick="useMyLocation()">🎯 Use My Current Location</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="focusMap()">🗺️ Select Location on Map</button>
+          </div>
+          <div id="map"></div>
+          <div class="loc-status wait" id="loc-status">Tap the map or use your current location to drop a pin (you can drag it).</div>
+          <div class="form-group">
+            <label for="address">Address</label>
+            <textarea id="address" rows="2" placeholder="House / flat, street, area — auto-filled from the map, you can edit it"></textarea>
+          </div>
+          <hr style="border:none; border-top:2px dashed #f0e4d8; margin:18px 0;">
+        </div>
+
+        <h3 style="margin-bottom:14px;">🗓️ Booking Details</h3>
+        <div class="form-row">
+          <div class="form-group"><label for="date">Date</label><input type="date" id="date"></div>
+          <div class="form-group"><label for="time">Time</label><select id="time"></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duration</label>
+            <select id="duration">
+              <option value="1">1 hour</option>
+              <option value="1.5">1.5 hours</option>
+              <option value="2">2 hours</option>
+              <option value="3">3 hours</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dogs">Number of dogs</label>
+            <select id="dogs">
+              <option value="1">1 dog</option><option value="2">2 dogs</option><option value="3">3 dogs</option>
+              <option value="4">4 dogs</option><option value="5">5 dogs</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="provider-group" style="display:none;">
+          <label for="provider">Service provider</label>
+          <select id="provider">
+            <option value="Male">Male provider</option>
+            <option value="Female">Female provider</option>
+          </select>
+        </div>
+        <p class="note">Service hours: 9:00 AM – 6:00 PM (start time).</p>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <h3 style="margin-bottom:14px;">💳 Payment Method</h3>
+        <div id="sb-payment"></div>
+      </div>
+    </div>
+
+    <!-- Price + confirm -->
+    <div class="summary-card">
+      <h3 style="margin-bottom:16px;">Price</h3>
+      <div id="price-box"><p class="helper-text">Select your options to see the price.</p></div>
+      <p class="error-text" id="book-error"></p>
+      <button class="btn btn-primary btn-block" id="confirm-btn" onclick="confirmBooking()" disabled>Confirm Booking</button>
+    </div>
+  </div>
+</main>
+
+<footer>🐾 PetWorld — Grooming & training, at our store or at your home.</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js?v=3"></script>
+<script src="js/book-service.js?v=2"></script>
+<script>document.getElementById("sb-payment").innerHTML = paymentSectionHTML("sb-payment");</script>
+</body>
+</html>

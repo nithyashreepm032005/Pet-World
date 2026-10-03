@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Forgot User ID</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">🐾 PetWorld</div>
+    <p class="auth-tagline">Forgot your User ID?</p>
+
+    <form id="resend-form">
+      <div class="form-group">
+        <label for="email">Registered Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <p class="error-text" id="resend-error"></p>
+      <p class="success-text" id="resend-success"></p>
+      <button class="btn btn-primary btn-block" id="resend-btn" type="submit">Send My User ID</button>
+    </form>
+
+    <div class="auth-switch">
+      <a href="index.html">Back to Login</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js?v=3"></script>
+<script>
+  document.getElementById("resend-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("resend-error");
+    const successEl = document.getElementById("resend-success");
+    const btn = document.getElementById("resend-btn");
+    errorEl.textContent = "";
+    successEl.textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    try {
+      const email = document.getElementById("email").value.trim();
+      const data = await api("/auth/resend-user-id", { method: "POST", auth: false, body: { email } });
+      successEl.textContent = data.message;
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Send My User ID";
+    }
+  });
+</script>
+</body>
+</html>

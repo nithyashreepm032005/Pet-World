@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Home</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header id="topbar"></header>
+
+<main class="container">
+  <div class="hero">
+    <h1>What does your pet need today? 🐾</h1>
+    <p>Browse dogs, food, and pet-care services — all in one place.</p>
+  </div>
+
+  <div class="main-cards">
+    <a href="dogs.html" class="main-card dogs">
+      <div class="emoji">🐶</div>
+      <h2>DOGS</h2>
+      <div class="btn">EXPLORE</div>
+    </a>
+    <a href="food.html" class="main-card food">
+      <div class="emoji">🍖</div>
+      <h2>FOOD</h2>
+      <div class="btn">EXPLORE</div>
+    </a>
+    <a href="services.html" class="main-card services">
+      <div class="emoji">🛁</div>
+      <h2>SERVICES</h2>
+      <div class="btn">EXPLORE</div>
+    </a>
+  </div>
+</main>
+
+<footer>🐾 PetWorld — Everything your pet needs, delivered with love.</footer>
+
+<script src="js/api.js"></script>
+<script>
+  requireAuth();
+  renderTopbar("home");
+  refreshCartBadge();
+</script>
+</body>
+</html>

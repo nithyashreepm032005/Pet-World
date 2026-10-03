@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Employee</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  #emp-map { height:340px; border-radius:16px; margin:10px 0; z-index:0; }
+  .emoji-marker { font-size:30px; line-height:34px; text-align:center; background:none; border:none; }
+  .panel { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:22px; }
+  .job { border:2px solid transparent; }
+  .job.selected { border-color:var(--primary); }
+  .job .line { font-size:14px; color:var(--text-dark); margin:3px 0; }
+  .job .line span { color:var(--text-muted); }
+  .job-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .pill { padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; background:#fff3cd; color:#856404; }
+  .pill.live { background:#d4edda; color:#155724; }
+  .pill.done { background:#e2e3e5; color:#41464b; }
+  .topline { display:flex; justify-content:space-between; align-items:center; padding:18px 0; flex-wrap:wrap; gap:10px; }
+  .gps-status { font-size:13px; color:var(--text-muted); margin-top:8px; }
+  .demo-box { background:#fff8e1; border-radius:12px; padding:10px 12px; font-size:13px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="auth-wrapper" id="login-view">
+  <div class="auth-card">
+    <div class="auth-logo">🐾 PetWorld</div>
+    <p class="auth-tagline">Employee Login</p>
+    <form id="login-form">
+      <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
+      <div class="form-group"><label for="password">Password</label><input type="password" id="password" required></div>
+      <p class="error-text" id="login-error"></p>
+      <button class="btn btn-primary btn-block" type="submit">Login</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dash-view" style="display:none;">
+  <div class="container">
+    <div class="topline">
+      <h1 style="font-size:24px;">🐾 Employee Dashboard <span id="emp-name" style="font-weight:600; font-size:16px; color:var(--text-muted);"></span></h1>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="cart-layout">
+      <div>
+        <h3 style="margin-bottom:12px;">My Home-Service Bookings</h3>
+        <div id="jobs"><div class="spinner"></div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Map</h3>
+        <div id="emp-map"></div>
+        <p class="helper-text">🏠 Customer &nbsp;&nbsp; 🚗 You</p>
+        <p class="gps-status" id="gps-status">Tracking is off.</p>
+        <div class="demo-box">
+          <label><input type="checkbox" id="sim-toggle"> <strong>Demo mode:</strong> simulate travel</label>
+          <div class="helper-text">Moves a fake position ~3&nbsp;km away toward the customer every 5&nbsp;seconds, so you can test tracking without physically moving. Turn it on <em>before</em> pressing Start Travel.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js?v=2"></script>
+<script src="js/employee.js?v=1"></script>
+</body>
+</html>

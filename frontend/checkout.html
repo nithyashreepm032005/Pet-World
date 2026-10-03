@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Checkout</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header id="topbar"></header>
+
+<main class="container">
+  <div class="page-header">
+    <div>
+      <a href="cart.html" class="back-link">← Back to Cart</a>
+      <h1>Checkout</h1>
+    </div>
+  </div>
+
+  <div class="cart-layout">
+    <div class="summary-card">
+      <h3 style="margin-bottom:16px;">Delivery Address</h3>
+      <p class="helper-text" style="margin-bottom:14px;">Required if your cart contains dogs or food. Not shown or linked to any dog's location.</p>
+      <div class="form-group"><label>Full Name</label><input id="c-name" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone Number</label><input id="c-phone" placeholder="10-digit number" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="c-email" placeholder="Optional, for order updates"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>House/Flat No.</label><input id="c-house" required></div>
+        <div class="form-group"><label>Street</label><input id="c-street" required></div>
+      </div>
+      <div class="form-group"><label>Area</label><input id="c-area" required></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <select id="c-city" required></select>
+        </div>
+        <div class="form-group"><label>State</label><input id="c-state" value="Karnataka" disabled></div>
+      </div>
+      <div class="form-group"><label>PIN Code</label><input id="c-pincode" placeholder="e.g. 560001" maxlength="6" required></div>
+      <hr style="border:none; border-top:2px dashed #f0e4d8; margin:18px 0;">
+      <div id="c-payment"></div>
+      <p class="error-text" id="checkout-error"></p>
+      <button class="btn btn-primary btn-block" id="place-order-btn">Place Order</button>
+    </div>
+    <div class="summary-card" id="order-summary">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</main>
+
+<footer>🐾 PetWorld — Almost there!</footer>
+
+<script src="js/api.js?v=3"></script>
+<script src="js/checkout.js?v=3"></script>
+<script>
+  document.getElementById("c-city").innerHTML = karnatakaCityOptionsHTML();
+  document.getElementById("c-payment").innerHTML = paymentSectionHTML("c-payment");
+</script>
+</body>
+</html>

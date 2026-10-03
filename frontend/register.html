@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetWorld — Register</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-card" style="max-width:480px;">
+    <div class="auth-logo">🐾 PetWorld</div>
+    <p class="auth-tagline">Create your account to get started</p>
+
+    <form id="register-form" style="text-align:left;">
+      <div class="form-group">
+        <label for="full_name">Full Name</label>
+        <input type="text" id="full_name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+        <p class="helper-text">Your User ID will be sent here — not shown on screen.</p>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" required>
+      </div>
+      <div class="form-group">
+        <label for="address">Address</label>
+        <textarea id="address" rows="2" required></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="password" minlength="8" maxlength="8" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">👁️</button>
+          </div>
+          <p class="helper-text">Must be exactly 8 characters</p>
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="confirm_password" minlength="8" maxlength="8" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirm_password', this)">👁️</button>
+          </div>
+        </div>
+      </div>
+      <p class="error-text" id="register-error"></p>
+      <p class="success-text" id="register-success"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="register-btn">Register</button>
+    </form>
+
+    <div class="auth-switch">
+      Already have an account? <a href="index.html">Login here</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js?v=3"></script>
+<script>
+  document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("register-error");
+    const successEl = document.getElementById("register-success");
+    const btn = document.getElementById("register-btn");
+    errorEl.textContent = "";
+    successEl.textContent = "";
+
+    const payload = {
+      full_name: document.getElementById("full_name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      password: document.getElementById("password").value,
+      confirm_password: document.getElementById("confirm_password").value,
+    };
+
+    if (payload.password.length !== 8) {
+      errorEl.textContent = "Password must be exactly 8 characters.";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Registering...";
+
+    try {
+      const data = await api("/auth/register", { method: "POST", auth: false, body: payload });
+      // The User ID is sent by email - intentionally NOT shown here.
+      successEl.textContent = data.message;
+      document.getElementById("register-form").reset();
+      setTimeout(() => (window.location.href = "index.html"), 3500);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      btn.disabled = false;
+      btn.textContent = "Register";
+    }
+  });
+</script>
+</body>
+</html>
