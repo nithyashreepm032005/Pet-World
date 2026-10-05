@@ -4,12 +4,18 @@ refreshCartBadge();
 
 let allBreeds = [];
 let favouriteIds = new Set();
-let selectedAges = {}; // breed_id -> variant_id
-let pendingBuy = null; // holds item info while buy modal is open
+let selectedAges = {};
+let activeBreedId = null;
+let pendingBuy = null;
+let myAccount = null; // cached profile, used to pre-fill the delivery form
 
 const CARD_COLORS = ["#ff9a56", "#3fb8af", "#7c5cff", "#ff6b9d", "#ffc93c", "#56d6c9"];
 function colorFor(id) {
   return CARD_COLORS[id % CARD_COLORS.length];
+}
+
+async function loadAccount() {
+  try { myAccount = await api("/account"); } catch (e) { /* ignore */ }
 }
 
 async function loadFavourites() {
@@ -22,7 +28,7 @@ async function loadFavourites() {
 async function loadDogs() {
   const grid = document.getElementById("dogs-grid");
   try {
-    await loadFavourites();
+    await Promise.all([loadFavourites(), loadAccount()]);
     allBreeds = await api("/dogs");
     if (!allBreeds.length) {
       grid.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3>No breeds available right now</h3><p>Please check back soon!</p></div>`;
@@ -35,16 +41,11 @@ async function loadDogs() {
 }
 
 function renderBreedCard(breed) {
-  const variants = [...breed.variants].sort((a, b) => a.age_months - b.age_months);
-  const defaultVariant = variants[0];
-  selectedAges[breed.id] = defaultVariant ? defaultVariant.id : null;
+  const defaultVariant = [...breed.variants].sort((a, b) => a.age_months - b.age_months)[0];
+  if (selectedAges[breed.id] === undefined) {
+    selectedAges[breed.id] = defaultVariant ? defaultVariant.id : null;
+  }
   const isFav = favouriteIds.has(breed.id);
-
-  const ageChips = variants.map(v => `
-    <span class="chip ${v.id === defaultVariant.id ? 'active' : ''}" data-breed="${breed.id}" data-variant="${v.id}" onclick="selectAge(${breed.id}, ${v.id})">
-      ${v.age_months < 12 ? v.age_months + ' mo' : (v.age_months/12) + ' yr'}
-    </span>
-  `).join("");
 
   return `
     <div class="card" id="breed-card-${breed.id}">
@@ -55,30 +56,12 @@ function renderBreedCard(breed) {
       <div class="card-body">
         <span class="card-tag">${breed.availability ? 'Available' : 'Unavailable'}</span>
         <h3>${breed.breed_name}</h3>
-        <p class="card-meta">${breed.gender} · ${breed.color} · ${breed.vaccination_status}</p>
-        <p class="card-meta">${breed.health_information || ""}</p>
-      </div>
-      <div class="select-group">${ageChips}</div>
-      <div class="card-body" style="padding-top:10px;">
-        <div class="card-price" id="price-${breed.id}">${formatPrice(defaultVariant ? defaultVariant.price : 0)}</div>
       </div>
       <div class="card-actions">
-        <button class="btn btn-outline" onclick="addToCart(${breed.id})">🛒 Add to Cart</button>
-        <button class="btn btn-primary" onclick="buyNow(${breed.id})">⚡ Buy Now</button>
+        <button class="btn btn-primary btn-block" onclick="openDetailsModal(${breed.id})">View Details</button>
       </div>
     </div>
   `;
-}
-
-function selectAge(breedId, variantId) {
-  selectedAges[breedId] = variantId;
-  const breed = allBreeds.find(b => b.id === breedId);
-  const variant = breed.variants.find(v => v.id === variantId);
-  document.getElementById(`price-${breedId}`).textContent = formatPrice(variant.price);
-
-  document.querySelectorAll(`#breed-card-${breedId} .chip`).forEach(chip => {
-    chip.classList.toggle("active", parseInt(chip.dataset.variant) === variantId);
-  });
 }
 
 async function toggleFavourite(breedId, btnEl) {
@@ -103,6 +86,52 @@ async function toggleFavourite(breedId, btnEl) {
   }
 }
 
+function openDetailsModal(breedId) {
+  activeBreedId = breedId;
+  const breed = allBreeds.find(b => b.id === breedId);
+  const variants = [...breed.variants].sort((a, b) => a.age_months - b.age_months);
+  if (!variants.find(v => v.id === selectedAges[breedId])) {
+    selectedAges[breedId] = variants[0] ? variants[0].id : null;
+  }
+
+  document.getElementById("details-img").innerHTML =
+    `<img src="${breed.image}" alt="${breed.breed_name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.style.background='${colorFor(breed.id)}'; this.remove();">`;
+  document.getElementById("details-name").textContent = breed.breed_name;
+  document.getElementById("details-meta").textContent = `${breed.gender} · ${breed.color} · ${breed.vaccination_status}`;
+  document.getElementById("details-health").textContent = breed.health_information || "";
+
+  document.getElementById("details-age-chips").innerHTML = variants.map(v => `
+    <span class="chip ${v.id === selectedAges[breedId] ? 'active' : ''}" data-variant="${v.id}" onclick="selectDetailsAge(${v.id})">
+      ${v.age_months < 12 ? v.age_months + ' mo' : (v.age_months / 12) + ' yr'}
+    </span>
+  `).join("");
+
+  updateDetailsPrice();
+
+  document.getElementById("details-cart-btn").onclick = () => addToCart(breedId);
+  document.getElementById("details-buy-btn").onclick = () => buyNow(breedId);
+
+  document.getElementById("details-modal").style.display = "flex";
+}
+
+function closeDetailsModal() {
+  document.getElementById("details-modal").style.display = "none";
+  activeBreedId = null;
+}
+
+function selectDetailsAge(variantId) {
+  selectedAges[activeBreedId] = variantId;
+  document.querySelectorAll("#details-age-chips .chip").forEach(chip => {
+    chip.classList.toggle("active", parseInt(chip.dataset.variant) === variantId);
+  });
+  updateDetailsPrice();
+}
+
+function updateDetailsPrice() {
+  const { variant } = getSelectedVariant(activeBreedId);
+  document.getElementById("details-price").textContent = formatPrice(variant ? variant.price : 0);
+}
+
 function getSelectedVariant(breedId) {
   const breed = allBreeds.find(b => b.id === breedId);
   const variantId = selectedAges[breedId];
@@ -125,9 +154,19 @@ async function addToCart(breedId) {
     });
     showToast(`${breed.breed_name} added to cart!`, "success");
     refreshCartBadge();
+    closeDetailsModal();
   } catch (err) {
     showToast(err.message, "error");
   }
+}
+
+// Pre-fills the delivery form with the customer's saved details, so they
+// don't have to retype their name/phone/email on every single purchase.
+function prefillBuyForm() {
+  if (!myAccount) return;
+  document.getElementById("bf-name").value = myAccount.full_name || "";
+  document.getElementById("bf-phone").value = myAccount.phone || "";
+  document.getElementById("bf-email").value = myAccount.email || "";
 }
 
 function buyNow(breedId) {
@@ -140,6 +179,8 @@ function buyNow(breedId) {
     selected_age: variant.age_months,
     details: { breed_name: breed.breed_name, age_months: variant.age_months, image: breed.image },
   };
+  closeDetailsModal();
+  prefillBuyForm();
   document.getElementById("buy-modal").style.display = "flex";
 }
 

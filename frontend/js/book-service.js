@@ -123,7 +123,10 @@ function setLocStatus(kind, text) {
 
 async function reverseGeocode(lat, lng) {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+    // accept-language=en forces English place names/addresses instead of
+    // the local-language (Kannada) names OpenStreetMap sometimes returns
+    // for locations in Karnataka.
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=en`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.display_name || null;

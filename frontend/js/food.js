@@ -6,9 +6,14 @@ let allFood = [];
 let favouriteIds = new Set();
 let selectedWeights = {};
 let pendingBuy = null;
+let myAccount = null;
 
 const CARD_COLORS = ["#3fb8af", "#ff9a56", "#7c5cff", "#ff6b9d", "#ffc93c", "#56d6c9"];
 function colorFor(id) { return CARD_COLORS[id % CARD_COLORS.length]; }
+
+async function loadAccount() {
+  try { myAccount = await api("/account"); } catch (e) { /* ignore */ }
+}
 
 async function loadFavourites() {
   try {
@@ -20,7 +25,7 @@ async function loadFavourites() {
 async function loadFood() {
   const grid = document.getElementById("food-grid");
   try {
-    await loadFavourites();
+    await Promise.all([loadFavourites(), loadAccount()]);
     allFood = await api("/food");
     if (!allFood.length) {
       grid.innerHTML = `<div class="empty-state"><div class="emoji">🍖</div><h3>No products available right now</h3></div>`;
@@ -126,6 +131,15 @@ async function addToCart(productId) {
   }
 }
 
+// Pre-fills the delivery form with the customer's saved details, so they
+// don't have to retype their name/phone/email on every single purchase.
+function prefillBuyForm() {
+  if (!myAccount) return;
+  document.getElementById("bf-name").value = myAccount.full_name || "";
+  document.getElementById("bf-phone").value = myAccount.phone || "";
+  document.getElementById("bf-email").value = myAccount.email || "";
+}
+
 function buyNow(productId) {
   const { product, variant } = getSelectedVariant(productId);
   pendingBuy = {
@@ -136,6 +150,7 @@ function buyNow(productId) {
     selected_weight: variant.weight_kg,
     details: { product_name: product.product_name, weight_kg: variant.weight_kg, image: product.image },
   };
+  prefillBuyForm();
   document.getElementById("buy-modal").style.display = "flex";
 }
 

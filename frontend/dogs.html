@@ -24,6 +24,24 @@
   </div>
 </main>
 
+<!-- Breed Details modal: image, full info, age selector, price, actions -->
+<div class="modal-overlay" id="details-modal" style="display:none;">
+  <div class="modal-box" style="max-width:520px;">
+    <span class="modal-close" onclick="closeDetailsModal()">&times;</span>
+    <div id="details-img" style="width:100%; height:220px; border-radius:16px; overflow:hidden; margin-bottom:16px; position:relative;"></div>
+    <h2 id="details-name" style="margin-bottom:6px;"></h2>
+    <p class="card-meta" id="details-meta" style="margin-bottom:4px;"></p>
+    <p class="card-meta" id="details-health" style="margin-bottom:14px;"></p>
+    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:8px;">Select Age</label>
+    <div class="select-group" id="details-age-chips" style="padding:0; margin-bottom:14px;"></div>
+    <div class="card-price" id="details-price" style="margin-bottom:16px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline btn-block" id="details-cart-btn">🛒 Add to Cart</button>
+      <button class="btn btn-primary btn-block" id="details-buy-btn">⚡ Buy Now</button>
+    </div>
+  </div>
+</div>
+
 <!-- Buy Now modal -->
 <div class="modal-overlay" id="buy-modal" style="display:none;">
   <div class="modal-box">
@@ -58,8 +76,8 @@
 
 <footer>🐾 PetWorld — Every breed, vet-checked and vaccinated.</footer>
 
-<script src="js/api.js?v=3"></script>
-<script src="js/dogs.js?v=4"></script>
+<script src="js/api.js?v=4"></script>
+<script src="js/dogs.js?v=5"></script>
 <script>
   document.getElementById("bf-city").innerHTML = karnatakaCityOptionsHTML();
   document.getElementById("bf-payment").innerHTML = paymentSectionHTML("bf-payment");

@@ -216,12 +216,12 @@ function renderTopbar(activePage = "") {
   const cartCount = parseInt(localStorage.getItem("pw_cart_count") || "0", 10);
   el.innerHTML = `
     <div class="container topbar">
+      <a href="home.html" class="brand-logo">🐾 PetWorld</a>
       <div class="topbar-left">
         <a href="favourites.html" class="icon-btn">❤ Favourites</a>
         <a href="cart.html" class="icon-btn">🛒 Cart<span class="badge" id="cart-badge" style="display:${cartCount ? "flex" : "none"}">${cartCount}</span></a>
         <a href="account.html" class="icon-btn">👤 Account</a>
       </div>
-      <a href="home.html" class="brand-logo">🐾 PetWorld</a>
     </div>
   `;
 }
