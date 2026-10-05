@@ -3,6 +3,15 @@ renderTopbar("checkout");
 
 const TYPE_EMOJI = { dog: "🐕", food: "🍖", service: "🛁" };
 
+async function prefillFromAccount() {
+  try {
+    const account = await api("/account");
+    document.getElementById("c-name").value = account.full_name || "";
+    document.getElementById("c-phone").value = account.phone || "";
+    document.getElementById("c-email").value = account.email || "";
+  } catch (e) { /* ignore - not fatal, just leave the fields blank */ }
+}
+
 async function loadSummary() {
   const el = document.getElementById("order-summary");
   try {
@@ -76,4 +85,5 @@ document.getElementById("place-order-btn").addEventListener("click", async () =>
   }
 });
 
+prefillFromAccount();
 loadSummary();
