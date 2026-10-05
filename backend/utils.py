@@ -155,10 +155,9 @@ def send_email(to_email, subject, body):
         msg["From"] = mail_user
         msg["To"] = to_email
 
-        server = smtplib.SMTP(
-            current_app.config["MAIL_SERVER"], current_app.config["MAIL_PORT"]
+        server = smtplib.SMTP_SSL(
+            current_app.config["MAIL_SERVER"], current_app.config["MAIL_PORT"], timeout=15
         )
-        server.starttls()
         server.login(mail_user, mail_pass)
         server.sendmail(mail_user, [to_email], msg.as_string())
         server.quit()
