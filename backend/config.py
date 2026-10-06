@@ -39,3 +39,14 @@ class Config:
 
     PASSWORD_LENGTH = 8
     CORS_ORIGINS = "*"
+    # ---- Vaccination scheduling ----
+    # Generic, configurable gap (in days) used to suggest a dog's next
+    # vaccination date. This is a placeholder default, NOT medical advice -
+    # change it to match your vet's actual guidance, or let it be
+    # overridden per-dog from the "My Dogs" page.
+    VACCINATION_INTERVAL_DAYS = int(os.environ.get("VACCINATION_INTERVAL_DAYS", 365))
+
+    # ---- Store location (shown to customers for Store Service bookings) ----
+    STORE_ADDRESS = "28, Bugle Rock Park, Basavanagudi, Bengaluru"
+    STORE_LATITUDE = 12.9423
+    STORE_LONGITUDE = 77.5760

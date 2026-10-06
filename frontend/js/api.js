@@ -17,9 +17,17 @@ function clearSession() {
   localStorage.removeItem("pw_token");
   localStorage.removeItem("pw_user");
 }
-function requireAuth() {
+function requireCustomer() {
   if (!getToken()) {
     window.location.href = "index.html";
+    return;
+  }
+  if (isAdmin()) {
+    // Admins have their own dashboard; keep them out of customer-only
+    // pages instead of letting them "see" their own admin record there,
+    // which looks like a data-isolation bug even though it technically
+    // isn't one.
+    window.location.href = "admin.html";
   }
 }
 function isAdmin() {
@@ -202,6 +210,11 @@ const KARNATAKA_CITIES = [
   "Chitradurga", "Raichur", "Bidar", "Bagalkot", "Gadag", "Haveri",
   "Koppal", "Yadgir", "Ramanagara", "Chamarajanagar", "Kodagu", "Uttara Kannada",
 ];
+// ---------------- Store location ----------------
+const STORE_ADDRESS = "28, Bugle Rock Park, Basavanagudi, Bengaluru";
+const STORE_LATITUDE = 12.9423;
+const STORE_LONGITUDE = 77.5760;
+const STORE_MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${STORE_LATITUDE},${STORE_LONGITUDE}`;
 
 function karnatakaCityOptionsHTML(selected = "Bengaluru") {
   return `<option value="">Select city…</option>` + KARNATAKA_CITIES.map(

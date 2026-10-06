@@ -29,6 +29,8 @@ def create_app():
     from routes.admin import admin_bp
     import service_models  # noqa: F401  (registers the Services-feature tables)
     import return_models   # noqa: F401  (registers the return_requests table)
+    import customer_dog_models  # noqa: F401  (registers the customer_dogs table)
+    from routes.customer_dogs import customer_dogs_bp
     from routes.service_bookings import service_bp, employee_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -44,7 +46,8 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix="/api")
     app.register_blueprint(service_bp, url_prefix="/api")
     app.register_blueprint(employee_bp, url_prefix="/api")
-
+    app.register_blueprint(customer_dogs_bp, url_prefix="/api")
+    
     @app.route("/api/health", methods=["GET"])
     def health():
         return jsonify({"status": "PetWorld API is running."}), 200
