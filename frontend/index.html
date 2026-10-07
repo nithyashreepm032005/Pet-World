@@ -16,53 +16,60 @@
   <div class="auth-card">
     <div class="auth-logo">🐾 PetWorld</div>
     <p class="auth-tagline" id="already-logged-in-text">You're already logged in.</p>
-    <button class="btn btn-primary btn-block" id="continue-btn" style="margin-bottom:10px;">Continue</button>
-    <button class="btn btn-outline btn-block" id="switch-account-btn">🔁 Log in as a different account</button>
+    <button class="btn btn-primary btn-block" id="continue-btn" style="margin-bottom:10px;" data-i18n="login.continue">Continue</button>
+    <button class="btn btn-outline btn-block" id="switch-account-btn" data-i18n="login.switch_account">🔁 Log in as a different account</button>
   </div>
 </div>
 
 <div class="auth-wrapper" id="login-view" style="display:none;">
   <div class="auth-card">
     <div class="auth-logo">🐾 PetWorld</div>
-    <p class="auth-tagline">Your pet's favourite online store</p>
+    <p class="auth-tagline" data-i18n="login.tagline">Your pet's favourite online store</p>
 
     <form id="login-form">
       <div class="form-group">
-        <label for="user_id">User ID</label>
-        <input type="text" id="user_id" placeholder="e.g. PW-7K2H9Q" required autocomplete="username">
+        <label for="user_id" data-i18n="login.user_id">User ID</label>
+        <input type="text" id="user_id" data-i18n-ph="login.user_id_ph" placeholder="e.g. PW-7K2H9Q" required autocomplete="username">
       </div>
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password" data-i18n="login.password">Password</label>
         <div class="password-wrapper">
-          <input type="password" id="password" placeholder="8 characters" required autocomplete="current-password">
+          <input type="password" id="password" data-i18n-ph="login.password_ph" placeholder="8 characters" required autocomplete="current-password">
           <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">👁️</button>
         </div>
       </div>
       <div class="auth-links">
-        <a href="resend-user-id.html">Forgot User ID?</a>
-        <a href="forgot-password.html">Forgot Password?</a>
+        <a href="forgot-password.html" data-i18n="login.forgot_password">Forgot Password?</a>
       </div>
+      <p class="success-text" id="register-success-note" style="display:none; text-align:center;"></p>
       <p class="error-text" id="login-error"></p>
-      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Login</button>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn" data-i18n="login.login">Login</button>
     </form>
 
     <div class="auth-switch">
-      New to PetWorld? <a href="register.html">Register here</a>
+      <span data-i18n="login.new_user">New to PetWorld?</span> <a href="register.html" data-i18n="login.register_here">Register here</a>
     </div>
-    <p class="helper-text" style="text-align:center; margin-top:14px;">
-      Customers and PetWorld administrators both log in here, with their own User ID and password.
-    </p>
+    <p class="helper-text" style="text-align:center; margin-top:14px;" data-i18n="login.helper">Customers and PetWorld administrators both log in here, with their own User ID and password.</p>
   </div>
 </div>
 
 <!-- Welcome screen: shown for exactly 3 seconds after successful login -->
 <div class="welcome-screen" id="welcome-screen" style="display:none;">
-  <div class="welcome-text">WELCOME TO PETWORLD</div>
+  <div class="welcome-text" data-i18n="login.welcome">WELCOME TO PETWORLD</div>
 </div>
 
-<script src="js/api.js?v=3"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script>
   const existingUser = getUser();
+
+  // A fresh registration lands here with this flag, so we greet the customer
+  // with the confirmation message instead of a silent login form.
+  if (sessionStorage.getItem("pw_reg_success")) {
+    sessionStorage.removeItem("pw_reg_success");
+    const note = document.getElementById("register-success-note");
+    note.textContent = t("register.success", "Registration successful. Please login using your User ID and password.");
+    note.style.display = "block";
+  }
 
   // If a session already exists, offer a choice instead of silently
   // redirecting - this is what lets someone switch from a customer
@@ -94,7 +101,7 @@
     const password = document.getElementById("password").value;
 
     btn.disabled = true;
-    btn.textContent = "Logging in...";
+    btn.textContent = t("login.logging_in", "Logging in...");
 
     try {
       const data = await api("/auth/login", {
@@ -113,9 +120,11 @@
     } catch (err) {
       errorEl.textContent = err.message;
       btn.disabled = false;
-      btn.textContent = "Login";
+      btn.textContent = t("login.login", "Login");
     }
   });
 </script>
+<div id="auth-lang" style="position:fixed; top:14px; right:16px; z-index:60;"></div>
+<script>document.getElementById("auth-lang").innerHTML = pwLangSelectHTML();</script>
 </body>
 </html>

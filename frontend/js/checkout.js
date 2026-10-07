@@ -17,29 +17,29 @@ async function loadSummary() {
   try {
     const data = await api("/cart");
     if (!data.items.length) {
-      el.innerHTML = `<div class="empty-state"><div class="emoji">🛒</div><h3>Your cart is empty</h3><a href="home.html" class="btn btn-primary" style="margin-top:12px;">Start Shopping</a></div>`;
+      el.innerHTML = `<div class="empty-state"><div class="emoji">🛒</div><h3 data-i18n="cart.empty_title">Your cart is empty</h3><a href="home.html" class="btn btn-primary" style="margin-top:12px;" data-i18n="common.start_shopping">Start Shopping</a></div>`;
       document.getElementById("place-order-btn").disabled = true;
       return;
     }
     const goodsItems = data.items.filter(i => i.item_type === "dog" || i.item_type === "food");
     const hasGoods = goodsItems.length > 0;
     const freeDeliveryNote = (hasGoods && data.delivery_charge > 0)
-      ? `<p class="helper-text" style="margin:-4px 0 10px;">Orders under ${formatPrice(data.free_delivery_threshold)} include a ${formatPrice(data.delivery_charge)} delivery charge. Add ${formatPrice(data.free_delivery_threshold - data.goods_subtotal)} more of dogs/food for free delivery!</p>`
-      : (hasGoods ? `<p class="helper-text" style="margin:-4px 0 10px; color:var(--success);">Your order qualifies for free delivery!</p>` : "");
+      ? `<p class="helper-text" style="margin:-4px 0 10px;">Orders under ${formatPrice(data.free_delivery_threshold)} include a ${formatPrice(data.delivery_charge)} delivery charge. <span data-i18n="cart.free_note_add">Add</span> ${formatPrice(data.free_delivery_threshold - data.goods_subtotal)} <span data-i18n="cart.free_note_rest">more of dogs/food for free delivery!</span></p>`
+      : (hasGoods ? `<p class="helper-text" style="margin:-4px 0 10px; color:var(--success);" data-i18n="checkout.free_qualifies">Your order qualifies for free delivery!</p>` : "");
 
     el.innerHTML = `
-      <h3 style="margin-bottom:16px;">Order Summary</h3>
+      <h3 style="margin-bottom:16px;" data-i18n="cart.order_summary">Order Summary</h3>
       ${data.items.map(i => {
         const d = i.details || {};
-        const name = d.breed_name || d.product_name || d.service_name || "Item";
+        const name = d.breed_name || d.product_name || d.service_name || t("common.item", "Item");
         return `<div class="summary-row"><span>${TYPE_EMOJI[i.item_type]} ${name} x${i.quantity}</span><span>${formatPrice(i.line_total)}</span></div>`;
       }).join("")}
       ${hasGoods ? (data.delivery_charge > 0
-        ? `<div class="summary-row"><span>Delivery Charge</span><span>${formatPrice(data.delivery_charge)}</span></div>`
-        : `<div class="summary-row"><span>Delivery Charge</span><span style="color:var(--success); font-weight:700;">FREE</span></div>`
+        ? `<div class="summary-row"><span data-i18n="cart.delivery_charge">Delivery Charge</span><span>${formatPrice(data.delivery_charge)}</span></div>`
+        : `<div class="summary-row"><span data-i18n="cart.delivery_charge">Delivery Charge</span><span style="color:var(--success); font-weight:700;" data-i18n="common.free">FREE</span></div>`
       ) : ""}
       ${freeDeliveryNote}
-      <div class="summary-total"><span>Total</span><span>${formatPrice(data.total)}</span></div>
+      <div class="summary-total"><span data-i18n="common.total">Total</span><span>${formatPrice(data.total)}</span></div>
     `;
   } catch (err) {
     el.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><h3>${err.message}</h3></div>`;
@@ -52,11 +52,11 @@ document.getElementById("place-order-btn").addEventListener("click", async () =>
 
   const pincode = document.getElementById("c-pincode").value.trim();
   if (!/^5[6-9]\d{4}$/.test(pincode)) {
-    errorEl.textContent = "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).";
+    errorEl.textContent = t("common.err_pincode", "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).");
     return;
   }
   if (!document.getElementById("c-city").value) {
-    errorEl.textContent = "Please select a city.";
+    errorEl.textContent = t("common.err_city", "Please select a city.");
     return;
   }
 
@@ -77,7 +77,7 @@ document.getElementById("place-order-btn").addEventListener("click", async () =>
 
   try {
     await api("/checkout/cart", { method: "POST", body: { address, ...payment } });
-    showToast("Order placed successfully!", "success");
+    showToast(t("common.order_placed", "Order placed successfully!"), "success");
     localStorage.setItem("pw_cart_count", "0");
     setTimeout(() => (window.location.href = "orders.html"), 1200);
   } catch (err) {

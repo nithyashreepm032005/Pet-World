@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — My Dogs</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -14,16 +15,13 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="account.html" class="back-link">← Back to Account</a>
-      <h1>My Dogs 🐾</h1>
+      <a href="account.html" class="back-link" data-i18n="common.back_account">← Back to Account</a>
+      <h1 data-i18n="my_dogs.title">My Dogs 🐾</h1>
     </div>
-    <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()" data-i18n="my_dogs.add_dog">+ Add Dog</button>
   </div>
 
-  <p class="helper-text" style="margin-bottom:18px;">
-    Keep track of your own dog's vaccination schedule. The "next due" date is just a configurable reminder —
-    always confirm the actual schedule with your vet.
-  </p>
+  <p class="helper-text" style="margin-bottom:18px;" data-i18n="my_dogs.helper">Keep track of your own dog's vaccination schedule. The "next due" date is just a configurable reminder — always confirm the actual schedule with your vet.</p>
 
   <div id="my-dogs-list">
     <div class="spinner"></div>
@@ -34,30 +32,31 @@
 <div class="modal-overlay" id="dog-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeDogModal()">&times;</span>
-    <h2 id="dog-modal-title">Add Dog</h2>
+    <h2 id="dog-modal-title" data-i18n="my_dogs.modal_add">Add Dog</h2>
     <form id="dog-form">
       <input type="hidden" id="dog-id">
-      <div class="form-group"><label>Dog's Name</label><input id="dog-name" required></div>
-      <div class="form-group"><label>Breed</label><input id="dog-breed" placeholder="e.g. Labrador Retriever"></div>
+      <div class="form-group"><label data-i18n="my_dogs.dog_name">Dog's Name</label><input id="dog-name" required></div>
+      <div class="form-group"><label data-i18n="my_dogs.breed">Breed</label><input id="dog-breed" data-i18n-ph="my_dogs.breed_ph" placeholder="e.g. Labrador Retriever"></div>
       <div class="form-group">
-        <label>Vaccination Date</label>
+        <label data-i18n="my_dogs.vacc_date">Vaccination Date</label>
         <input type="date" id="dog-vacc-date">
       </div>
       <div class="form-group">
-        <label>Reminder interval (days)</label>
+        <label data-i18n="my_dogs.interval">Reminder interval (days)</label>
         <input type="number" id="dog-interval" value="365" min="1">
-        <p class="helper-text">Default 365 days — change this to match your vet's actual advice.</p>
+        <p class="helper-text" data-i18n="my_dogs.interval_helper">Default 365 days — change this to match your vet's actual advice.</p>
       </div>
-      <div class="form-group"><label>Notes</label><textarea id="dog-notes" rows="2" placeholder="Optional"></textarea></div>
+      <div class="form-group"><label data-i18n="my_dogs.notes">Notes</label><textarea id="dog-notes" rows="2" data-i18n-ph="my_dogs.notes_ph" placeholder="Optional"></textarea></div>
       <p class="error-text" id="dog-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Save</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="common.save">Save</button>
     </form>
   </div>
 </div>
 
-<footer>🐾 PetWorld — Your pets, your records, private to you.</footer>
+<footer data-i18n="my_dogs.footer">🐾 PetWorld — Your pets, your records, private to you.</footer>
 
-<script src="js/api.js?v=5"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/my-dogs.js?v=1"></script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

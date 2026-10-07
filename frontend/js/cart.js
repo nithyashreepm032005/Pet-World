@@ -14,9 +14,9 @@ async function loadCart() {
       layout.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
           <div class="emoji">🛒</div>
-          <h3>Your cart is empty</h3>
-          <p>Looks like you haven't added anything yet.</p>
-          <a href="home.html" class="btn btn-primary" style="margin-top:16px;">Start Shopping</a>
+          <h3 data-i18n="cart.empty_title">Your cart is empty</h3>
+          <p data-i18n="cart.empty_text">Looks like you haven't added anything yet.</p>
+          <a href="home.html" class="btn btn-primary" style="margin-top:16px;" data-i18n="common.start_shopping">Start Shopping</a>
         </div>`;
       return;
     }
@@ -24,22 +24,22 @@ async function loadCart() {
     const hasGoods = data.items.some(i => i.item_type === "dog" || i.item_type === "food");
     const hasServices = data.items.some(i => i.item_type === "service");
     const deliveryRow = data.delivery_charge > 0
-      ? `<div class="summary-row"><span>Delivery Charge</span><span>${formatPrice(data.delivery_charge)}</span></div>`
-      : (hasGoods ? `<div class="summary-row"><span>Delivery Charge</span><span style="color:var(--success); font-weight:700;">FREE</span></div>` : "");
+      ? `<div class="summary-row"><span data-i18n="cart.delivery_charge">Delivery Charge</span><span>${formatPrice(data.delivery_charge)}</span></div>`
+      : (hasGoods ? `<div class="summary-row"><span data-i18n="cart.delivery_charge">Delivery Charge</span><span style="color:var(--success); font-weight:700;" data-i18n="common.free">FREE</span></div>` : "");
     const freeDeliveryNote = (hasGoods && data.delivery_charge > 0)
-      ? `<p class="helper-text" style="margin-top:-4px; margin-bottom:10px;">Add ${formatPrice(data.free_delivery_threshold - data.goods_subtotal)} more of dogs/food for free delivery!</p>`
+      ? `<p class="helper-text" style="margin-top:-4px; margin-bottom:10px;"><span data-i18n="cart.free_note_add">Add</span> ${formatPrice(data.free_delivery_threshold - data.goods_subtotal)} <span data-i18n="cart.free_note_rest">more of dogs/food for free delivery!</span></p>`
       : "";
 
     layout.innerHTML = `
       <div>${data.items.map(renderCartItem).join("")}</div>
       <div class="summary-card">
-        <h3 style="margin-bottom:16px;">Order Summary</h3>
-        <div class="summary-row"><span>Items</span><span>${data.items.reduce((s,i)=>s+i.quantity,0)}</span></div>
+        <h3 style="margin-bottom:16px;" data-i18n="cart.order_summary">Order Summary</h3>
+        <div class="summary-row"><span data-i18n="cart.items">Items</span><span>${data.items.reduce((s,i)=>s+i.quantity,0)}</span></div>
         ${deliveryRow}
         ${freeDeliveryNote}
-        <div class="summary-total"><span>Total</span><span>${formatPrice(data.total)}</span></div>
-        <button class="btn btn-primary btn-block" onclick="goCheckout()">Proceed to Checkout</button>
-        ${hasGoods && hasServices ? '<p class="helper-text" style="margin-top:10px;">Your delivery items and service bookings will be checked out together.</p>' : ''}
+        <div class="summary-total"><span data-i18n="common.total">Total</span><span>${formatPrice(data.total)}</span></div>
+        <button class="btn btn-primary btn-block" onclick="goCheckout()" data-i18n="cart.checkout_btn">Proceed to Checkout</button>
+        ${hasGoods && hasServices ? '<p class="helper-text" style="margin-top:10px;" data-i18n="cart.combined_note">Your delivery items and service bookings will be checked out together.</p>' : ''}
       </div>
     `;
   } catch (err) {
@@ -52,13 +52,13 @@ function renderCartItem(item) {
   let title, meta;
   if (item.item_type === "dog") {
     title = d.breed_name || "Dog";
-    meta = `Age: ${d.age_months} months`;
+    meta = `<span data-i18n="common.age">Age</span>: ${d.age_months} <span data-i18n="common.months">months</span>`;
   } else if (item.item_type === "food") {
     title = d.product_name || "Food";
-    meta = `Weight: ${d.weight_kg} KG`;
+    meta = `<span data-i18n="common.weight">Weight</span>: ${d.weight_kg} KG`;
   } else {
     title = `${d.service_name || "Service"} — ${d.package_name || ""}`;
-    meta = `${item.selected_date || ""} at ${item.selected_time || ""}`;
+    meta = `${item.selected_date || ""} <span data-i18n="bookings.at_time">at</span> ${item.selected_time || ""}`;
   }
 
   const imgBox = d.image
@@ -71,14 +71,14 @@ function renderCartItem(item) {
       <div class="info">
         <h4>${title}</h4>
         <p>${meta}</p>
-        <p style="font-weight:700; color:var(--primary-dark); margin-top:4px;">${formatPrice(item.price)} ${item.item_type !== 'service' ? 'each' : ''}</p>
+        <p style="font-weight:700; color:var(--primary-dark); margin-top:4px;">${formatPrice(item.price)} ${item.item_type !== 'service' ? '<span data-i18n="common.each">each</span>' : ''}</p>
         ${item.item_type !== "service" ? `
           <div class="qty-control">
             <button onclick="updateQty(${item.id}, ${item.quantity - 1})">−</button>
             <span>${item.quantity}</span>
             <button onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
           </div>` : ""}
-        <span class="remove-link" onclick="removeItem(${item.id})">Remove</span>
+        <span class="remove-link" onclick="removeItem(${item.id})" data-i18n="common.remove">Remove</span>
       </div>
       <div style="font-weight:800; font-size:16px;">${formatPrice(item.line_total)}</div>
     </div>
@@ -98,7 +98,7 @@ async function updateQty(itemId, qty) {
 async function removeItem(itemId) {
   try {
     await api(`/cart/${itemId}`, { method: "DELETE" });
-    showToast("Item removed from cart");
+    showToast(t("common.cart_item_removed", "Item removed from cart"));
     loadCart();
   } catch (err) {
     showToast(err.message, "error");

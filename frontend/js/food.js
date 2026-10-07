@@ -28,7 +28,7 @@ async function loadFood() {
     await Promise.all([loadFavourites(), loadAccount()]);
     allFood = await api("/food");
     if (!allFood.length) {
-      grid.innerHTML = `<div class="empty-state"><div class="emoji">🍖</div><h3>No products available right now</h3></div>`;
+      grid.innerHTML = `<div class="empty-state"><div class="emoji">🍖</div><h3 data-i18n="food.empty_title">No products available right now</h3></div>`;
       return;
     }
     grid.innerHTML = allFood.map(renderFoodCard).join("");
@@ -65,8 +65,8 @@ function renderFoodCard(product) {
         <div class="card-price" id="price-${product.id}">${formatPrice(defaultVariant ? defaultVariant.price : 0)}</div>
       </div>
       <div class="card-actions">
-        <button class="btn btn-outline" onclick="addToCart(${product.id})">🛒 Add to Cart</button>
-        <button class="btn btn-primary" onclick="buyNow(${product.id})">⚡ Buy Now</button>
+        <button class="btn btn-outline" onclick="addToCart(${product.id})" data-i18n="common.add_to_cart">🛒 Add to Cart</button>
+        <button class="btn btn-primary" onclick="buyNow(${product.id})" data-i18n="common.buy_now">⚡ Buy Now</button>
       </div>
     </div>
   `;
@@ -91,13 +91,13 @@ async function toggleFavourite(productId, btnEl) {
       favouriteIds.delete(productId);
       btnEl.textContent = "🤍";
       btnEl.classList.remove("active");
-      showToast("Removed from favourites");
+      showToast(t("common.fav_removed", "Removed from favourites"));
     } else {
       await api("/favourites", { method: "POST", body: { item_type: "food", item_id: productId } });
       favouriteIds.add(productId);
       btnEl.textContent = "❤";
       btnEl.classList.add("active");
-      showToast("Added to favourites", "success");
+      showToast(t("common.fav_added", "Added to favourites"), "success");
     }
   } catch (err) {
     showToast(err.message, "error");
@@ -124,7 +124,7 @@ async function addToCart(productId) {
         details: { product_name: product.product_name, weight_kg: variant.weight_kg, image: product.image },
       },
     });
-    showToast(`${product.product_name} added to cart!`, "success");
+    showToast(`${product.product_name} ${t("common.added_to_cart", "added to cart!")}`, "success");
     refreshCartBadge();
   } catch (err) {
     showToast(err.message, "error");
@@ -166,11 +166,11 @@ document.getElementById("buy-form").addEventListener("submit", async (e) => {
 
   const pincode = document.getElementById("bf-pincode").value.trim();
   if (!/^5[6-9]\d{4}$/.test(pincode)) {
-    errorEl.textContent = "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).";
+    errorEl.textContent = t("common.err_pincode", "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).");
     return;
   }
   if (!document.getElementById("bf-city").value) {
-    errorEl.textContent = "Please select a city.";
+    errorEl.textContent = t("common.err_city", "Please select a city.");
     return;
   }
 
@@ -191,7 +191,7 @@ document.getElementById("buy-form").addEventListener("submit", async (e) => {
 
   try {
     await api("/checkout/buy-now", { method: "POST", body: { ...pendingBuy, address, ...payment } });
-    showToast("Order placed successfully!", "success");
+    showToast(t("common.order_placed", "Order placed successfully!"), "success");
     closeBuyModal();
     setTimeout(() => (window.location.href = "orders.html"), 1200);
   } catch (err) {

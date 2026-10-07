@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — My Account</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -14,8 +15,8 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="home.html" class="back-link">← Back to Home</a>
-      <h1>My Account</h1>
+      <a href="home.html" class="back-link" data-i18n="common.back_home">← Back to Home</a>
+      <h1 data-i18n="account.title">My Account</h1>
     </div>
   </div>
 
@@ -25,35 +26,36 @@
       <h3 id="sidebar-name">—</h3>
       <p id="sidebar-userid">—</p>
       <ul>
-        <li><a class="active" href="account.html">👤 Profile</a></li>
-        <li><a href="my-dogs.html">🐾 My Dogs</a></li>
-        <li><a href="orders.html">📦 My Orders</a></li>
-        <li><a href="bookings.html">🗓️ My Bookings</a></li>
-        <li><a href="favourites.html">❤ My Favourites</a></li>
-        <li><a href="cart.html">🛒 My Cart</a></li>
-        <li><a href="#" id="logout-link">🚪 Logout</a></li>
+        <li><a class="active" href="account.html" data-i18n="account.nav_profile">👤 Profile</a></li>
+        <li><a href="my-dogs.html" data-i18n="account.nav_dogs">🐾 My Dogs</a></li>
+        <li><a href="orders.html" data-i18n="account.nav_orders">📦 My Orders</a></li>
+        <li><a href="bookings.html" data-i18n="account.nav_bookings">🗓️ My Bookings</a></li>
+        <li><a href="favourites.html" data-i18n="account.nav_favourites">❤ My Favourites</a></li>
+        <li><a href="cart.html" data-i18n="account.nav_cart">🛒 My Cart</a></li>
+        <li><a href="#" id="logout-link" data-i18n="account.nav_logout">🚪 Logout</a></li>
       </ul>
     </aside>
 
     <section class="account-content">
-      <h3 style="margin-bottom:18px;">Profile Details</h3>
+      <h3 style="margin-bottom:18px;" data-i18n="account.profile_details">Profile Details</h3>
       <form id="account-form">
-        <div class="form-group"><label>User ID</label><input id="a-userid" disabled></div>
-        <div class="form-group"><label>Full Name</label><input id="a-name" required></div>
-        <div class="form-group"><label>Email</label><input id="a-email" disabled></div>
-        <div class="form-group"><label>Phone</label><input id="a-phone" required></div>
-        <div class="form-group"><label>Address</label><textarea id="a-address" rows="2" required></textarea></div>
+        <div class="form-group"><label data-i18n="account.user_id">User ID</label><input id="a-userid" disabled></div>
+        <div class="form-group"><label data-i18n="common.full_name">Full Name</label><input id="a-name" required></div>
+        <div class="form-group"><label data-i18n="common.email">Email</label><input id="a-email" disabled></div>
+        <div class="form-group"><label data-i18n="common.phone">Phone</label><input id="a-phone" required></div>
+        <div class="form-group"><label data-i18n="account.address">Address</label><textarea id="a-address" rows="2" required></textarea></div>
         <p class="error-text" id="account-error"></p>
         <p class="success-text" id="account-success"></p>
-        <button class="btn btn-primary" type="submit">Save Changes</button>
+        <button class="btn btn-primary" type="submit" data-i18n="account.save_changes">Save Changes</button>
       </form>
     </section>
   </div>
 </main>
 
-<footer>🐾 PetWorld — Your information is private and secure.</footer>
+<footer data-i18n="account.footer">🐾 PetWorld — Your information is private and secure.</footer>
 
-<script src="js/api.js"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/account.js"></script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

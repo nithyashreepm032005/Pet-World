@@ -11,7 +11,6 @@ from extensions import db, bcrypt
 from models import (
     User, DogBreed, DogVariant, FoodProduct, FoodVariant, Service, ServicePackage
 )
-from utils import generate_user_id
 
 app = create_app()
 
@@ -68,6 +67,14 @@ SERVICES = {
         ("Puppy Training Program", "45 mins/session", 899),
     ],
 }
+
+# Explicit image paths that actually exist under frontend/ - deriving them from
+# the display name produced broken links (e.g. grooming_and_spa.jpg).
+SERVICE_IMAGES = {
+    "Grooming & Spa": "images/services/grooming1.jpg",
+    "Training & Behavioral": "images/services/training1.jpg",
+}
+DEFAULT_SERVICE_IMAGE = "images/services/default-service.svg"
 
 
 def seed():
@@ -132,7 +139,7 @@ def seed():
                 service = Service(
                     service_name=service_name,
                     description=f"{service_name} services for your beloved pet.",
-                    image=f"images/services/{service_name.lower().replace(' ', '_').replace('&', 'and')}.jpg",
+                    image=SERVICE_IMAGES.get(service_name, DEFAULT_SERVICE_IMAGE),
                     availability=True,
                 )
                 db.session.add(service)

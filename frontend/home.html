@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — Home</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -13,36 +14,37 @@
 
 <main class="container">
   <div class="hero">
-    <h1>What does your pet need today? 🐾</h1>
-    <p>Browse dogs, food, and pet-care services — all in one place.</p>
+    <h1 data-i18n="home.hero_title">What does your pet need today? 🐾</h1>
+    <p data-i18n="home.hero_sub">Browse dogs, food, and pet-care services — all in one place.</p>
   </div>
 
   <div class="main-cards">
     <a href="dogs.html" class="main-card dogs">
       <div class="emoji">🐶</div>
-      <h2>DOGS</h2>
-      <div class="btn">EXPLORE</div>
+      <h2 data-i18n="home.dogs">DOGS</h2>
+      <div class="btn" data-i18n="common.explore">EXPLORE</div>
     </a>
     <a href="food.html" class="main-card food">
       <div class="emoji">🍖</div>
-      <h2>FOOD</h2>
-      <div class="btn">EXPLORE</div>
+      <h2 data-i18n="home.food">FOOD</h2>
+      <div class="btn" data-i18n="common.explore">EXPLORE</div>
     </a>
     <a href="services.html" class="main-card services">
       <div class="emoji">🛁</div>
-      <h2>SERVICES</h2>
-      <div class="btn">EXPLORE</div>
+      <h2 data-i18n="home.services">SERVICES</h2>
+      <div class="btn" data-i18n="common.explore">EXPLORE</div>
     </a>
   </div>
 </main>
 
-<footer>🐾 PetWorld — Everything your pet needs, delivered with love.</footer>
+<footer data-i18n="home.footer">🐾 PetWorld — Everything your pet needs, delivered with love.</footer>
 
-<script src="js/api.js"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script>
   requireCustomer();
   renderTopbar("home");
   refreshCartBadge();
 </script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

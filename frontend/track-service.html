@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — Track Employee</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -34,8 +35,8 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="bookings.html" class="back-link">← My Bookings</a>
-      <h1>Track Your Service 📍</h1>
+      <a href="bookings.html" class="back-link" data-i18n="common.back_bookings">← My Bookings</a>
+      <h1 data-i18n="track.title">Track Your Service 📍</h1>
     </div>
   </div>
 
@@ -44,28 +45,29 @@
       <div class="live-banner" id="banner">Loading…</div>
       <div class="panel">
         <div id="map"></div>
-        <p class="legend">🏠 Your location &nbsp;&nbsp; 🚗 Employee location</p>
+        <p class="legend" data-i18n="track.legend">🏠 Your location &nbsp;&nbsp; 🚗 Employee location</p>
         <p class="legend" id="distance-line"></p>
       </div>
     </div>
 
     <div>
       <div class="panel" style="margin-bottom:18px;">
-        <h3 style="margin-bottom:10px;">Booking Details</h3>
+        <h3 style="margin-bottom:10px;" data-i18n="track.booking_details">Booking Details</h3>
         <div id="details"></div>
       </div>
       <div class="panel">
-        <h3 style="margin-bottom:6px;">Status</h3>
+        <h3 style="margin-bottom:6px;" data-i18n="track.status">Status</h3>
         <ul class="steps" id="steps"></ul>
       </div>
     </div>
   </div>
 </main>
 
-<footer>🐾 PetWorld — The map refreshes automatically every 5 seconds.</footer>
+<footer data-i18n="track.footer">🐾 PetWorld — The map refreshes automatically every 5 seconds.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="js/api.js?v=2"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/track-service.js?v=1"></script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

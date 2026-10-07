@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — My Bookings</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -14,19 +15,20 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="account.html" class="back-link">← Back to Account</a>
-      <h1>My Service Bookings 🗓️</h1>
+      <a href="account.html" class="back-link" data-i18n="common.back_account">← Back to Account</a>
+      <h1 data-i18n="bookings.title">My Service Bookings 🗓️</h1>
     </div>
-    <a href="services.html" class="btn btn-primary btn-sm">+ New Booking</a>
+    <a href="services.html" class="btn btn-primary btn-sm" data-i18n="bookings.new_booking">+ New Booking</a>
   </div>
   <div id="bookings-list">
     <div class="spinner"></div>
   </div>
 </main>
 
-<footer>🐾 PetWorld — Grooming & training, on your schedule.</footer>
+<footer data-i18n="bookings.footer">🐾 PetWorld — Grooming & training, on your schedule.</footer>
 
-<script src="js/api.js?v=2"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/bookings.js?v=4"></script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

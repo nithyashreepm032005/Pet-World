@@ -2,6 +2,12 @@
 // Change this if your Flask backend runs on a different host/port.
 const API_BASE = "http://localhost:5000/api";
 
+// i18n.js (loaded before this file) provides the real t(); this stub keeps
+// every other script working with plain English if it is ever missing.
+if (typeof window.t !== "function") {
+  window.t = (key, fallback) => (fallback !== undefined ? fallback : key);
+}
+
 function getToken() {
   return localStorage.getItem("pw_token");
 }
@@ -61,15 +67,77 @@ async function api(path, { method = "GET", body = null, auth = true } = {}) {
   }
 
   if (res.status === 401) {
-    clearSession();
-    window.location.href = "index.html";
-    return;
+    // 401 on a protected call means the session is dead -> bounce to login.
+    // 401 on an unauthenticated call (wrong password etc.) is a normal app
+    // error: surface it so the form can show the message.
+    if (auth && getToken()) {
+      clearSession();
+      window.location.href = "index.html";
+      return;
+    }
+    throw new Error(data.error || "Invalid User ID or password.");
   }
 
   if (!res.ok) {
     throw new Error(data.error || "Something went wrong. Please try again.");
   }
   return data;
+}
+
+// ---------------- Multipart upload (admin service images, etc.) ----------------
+async function apiUpload(path, formData) {
+  const headers = {};
+  if (getToken()) {
+    headers["Authorization"] = `Bearer ${getToken()}`;
+  }
+  let res;
+  try {
+    // No Content-Type header: the browser must add the multipart boundary.
+    res = await fetch(`${API_BASE}${path}`, { method: "POST", headers, body: formData });
+  } catch (err) {
+    throw new Error(
+      "Could not reach the PetWorld server. Make sure the Flask backend is running on http://localhost:5000."
+    );
+  }
+  let data = {};
+  try {
+    data = await res.json();
+  } catch (e) { /* no JSON body */ }
+
+  if (res.status === 401) {
+    clearSession();
+    window.location.href = "index.html";
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(data.error || "Upload failed. Please try again.");
+  }
+  return data;
+}
+
+// ---------------- Image paths ----------------
+// DB stores web paths like "images/services/grooming1.jpg" (relative to
+// frontend/), but may also contain full URLs. Normalise to something the
+// <img> tag can load without ever exposing an absolute filesystem path.
+function resolveImageUrl(path) {
+  if (!path) return "";
+  const p = String(path).trim();
+  if (/^(https?:|data:|blob:)/i.test(p)) return p;
+  return p.replace(/^\.?\//, "");
+}
+
+const PW_DEFAULT_IMAGE = "images/services/default-service.svg";
+
+// onerror handler for service images: try the default image once, then hide
+// the <img> so the coloured tile/emoji behind it shows - never a broken icon.
+function pwImgError(img) {
+  const fallback = img.dataset.fallbackSrc || PW_DEFAULT_IMAGE;
+  if (!img.dataset.fallbackTried && resolveImageUrl(img.getAttribute("src")) !== fallback) {
+    img.dataset.fallbackTried = "1";
+    img.src = fallback;
+    return;
+  }
+  img.style.display = "none";
 }
 
 // ---------------- Toast notifications ----------------
@@ -122,16 +190,16 @@ document.addEventListener("DOMContentLoaded", () => {
 function paymentSectionHTML(containerId) {
   return `
     <div id="${containerId}">
-      <label style="display:block; font-size:13px; font-weight:600; margin-bottom:8px;">Payment Method</label>
+      <label style="display:block; font-size:13px; font-weight:600; margin-bottom:8px;" data-i18n="common.payment_method">Payment Method</label>
       <div class="payment-options">
         <button type="button" class="payment-option active" data-method="COD" onclick="selectPaymentMethod('${containerId}','COD')">
-          <span class="icon">💵</span><span class="label">Cash on Delivery</span>
+          <span class="icon">💵</span><span class="label" data-i18n="common.cash_on_delivery">Cash on Delivery</span>
         </button>
         <button type="button" class="payment-option" data-method="UPI" onclick="selectPaymentMethod('${containerId}','UPI')">
-          <span class="icon">📱</span><span class="label">UPI</span>
+          <span class="icon">📱</span><span class="label" data-i18n="common.upi">UPI</span>
         </button>
         <button type="button" class="payment-option" data-method="Card" onclick="selectPaymentMethod('${containerId}','Card')">
-          <span class="icon">💳</span><span class="label">Card</span>
+          <span class="icon">💳</span><span class="label" data-i18n="common.card">Card</span>
         </button>
       </div>
       <div id="${containerId}-fields"></div>
@@ -151,22 +219,22 @@ function selectPaymentMethod(containerId, method) {
     fields.innerHTML = `
       <div class="payment-details">
         <div class="form-group" style="margin-bottom:0;">
-          <label>UPI ID</label>
-          <input type="text" id="${containerId}-upi" placeholder="yourname@okhdfcbank">
+          <label data-i18n="common.upi_id">UPI ID</label>
+          <input type="text" id="${containerId}-upi" data-i18n-ph="common.upi_id" placeholder="yourname@okhdfcbank">
         </div>
       </div>`;
   } else if (method === "Card") {
     fields.innerHTML = `
       <div class="payment-details">
-        <div class="form-group"><label>Name on Card</label><input type="text" id="${containerId}-card-name" placeholder="As printed on card"></div>
-        <div class="form-group"><label>Card Number</label><input type="text" id="${containerId}-card-number" placeholder="1234 5678 9012 3456" maxlength="19"></div>
+        <div class="form-group"><label data-i18n="common.name_on_card">Name on Card</label><input type="text" id="${containerId}-card-name" data-i18n-ph="common.name_on_card" placeholder="As printed on card"></div>
+        <div class="form-group"><label data-i18n="common.card_number">Card Number</label><input type="text" id="${containerId}-card-number" data-i18n-ph="common.card_number" placeholder="1234 5678 9012 3456" maxlength="19"></div>
         <div class="form-row">
-          <div class="form-group" style="margin-bottom:0;"><label>Expiry (MM/YY)</label><input type="text" id="${containerId}-card-expiry" placeholder="09/28" maxlength="5"></div>
-          <div class="form-group" style="margin-bottom:0;"><label>CVV</label><input type="password" id="${containerId}-card-cvv" placeholder="123" maxlength="4"></div>
+          <div class="form-group" style="margin-bottom:0;"><label data-i18n="common.expiry">Expiry (MM/YY)</label><input type="text" id="${containerId}-card-expiry" placeholder="09/28" maxlength="5"></div>
+          <div class="form-group" style="margin-bottom:0;"><label data-i18n="common.cvv">CVV</label><input type="password" id="${containerId}-card-cvv" placeholder="123" maxlength="4"></div>
         </div>
       </div>`;
   } else {
-    fields.innerHTML = `<p class="helper-text" style="margin-bottom:8px;">Pay with cash when your order arrives.</p>`;
+    fields.innerHTML = `<p class="helper-text" style="margin-bottom:8px;" data-i18n="common.pay_cash_note">Pay with cash when your order arrives.</p>`;
   }
 }
 
@@ -181,7 +249,7 @@ function getPaymentPayload(containerId) {
   if (method === "UPI") {
     const upi_id = document.getElementById(`${containerId}-upi`).value.trim();
     if (!upi_id.includes("@")) {
-      showToast("Please enter a valid UPI ID (e.g. name@bank).", "error");
+      showToast(t("common.err_upi", "Please enter a valid UPI ID (e.g. name@bank)."), "error");
       return null;
     }
     return { payment_method: "UPI", payment_details: { upi_id } };
@@ -193,7 +261,7 @@ function getPaymentPayload(containerId) {
     const expiry = document.getElementById(`${containerId}-card-expiry`).value.trim();
     const cvv = document.getElementById(`${containerId}-card-cvv`).value.trim();
     if (card_number.replace(/\s+/g, "").length < 13 || !/^\d{2}\/\d{2}$/.test(expiry) || cvv.length < 3 || !card_name) {
-      showToast("Please fill in valid card details.", "error");
+      showToast(t("common.err_card", "Please fill in valid card details."), "error");
       return null;
     }
     return { payment_method: "Card", payment_details: { card_name, card_number, expiry, cvv } };
@@ -217,7 +285,7 @@ const STORE_LONGITUDE = 77.5760;
 const STORE_MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${STORE_LATITUDE},${STORE_LONGITUDE}`;
 
 function karnatakaCityOptionsHTML(selected = "Bengaluru") {
-  return `<option value="">Select city…</option>` + KARNATAKA_CITIES.map(
+  return `<option value="" data-i18n="common.select_city">Select city…</option>` + KARNATAKA_CITIES.map(
     (c) => `<option value="${c}" ${c === selected ? "selected" : ""}>${c}</option>`
   ).join("");
 }
@@ -227,16 +295,19 @@ function renderTopbar(activePage = "") {
   const el = document.getElementById("topbar");
   if (!el) return;
   const cartCount = parseInt(localStorage.getItem("pw_cart_count") || "0", 10);
+  const langHTML = typeof pwLangSelectHTML === "function" ? pwLangSelectHTML() : "";
   el.innerHTML = `
     <div class="container topbar">
       <a href="home.html" class="brand-logo">🐾 PetWorld</a>
       <div class="topbar-left">
-        <a href="favourites.html" class="icon-btn">❤ Favourites</a>
-        <a href="cart.html" class="icon-btn">🛒 Cart<span class="badge" id="cart-badge" style="display:${cartCount ? "flex" : "none"}">${cartCount}</span></a>
-        <a href="account.html" class="icon-btn">👤 Account</a>
+        <a href="favourites.html" class="icon-btn"><span data-i18n="topbar.favourites">❤ Favourites</span></a>
+        <a href="cart.html" class="icon-btn"><span data-i18n="topbar.cart">🛒 Cart</span><span class="badge" id="cart-badge" style="display:${cartCount ? "flex" : "none"}">${cartCount}</span></a>
+        <a href="account.html" class="icon-btn"><span data-i18n="topbar.account">👤 Account</span></a>
+        ${langHTML}
       </div>
     </div>
   `;
+  if (typeof pwMountLangSelects === "function") pwMountLangSelects();
 }
 
 async function refreshCartBadge() {

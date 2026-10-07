@@ -38,7 +38,8 @@ function buildTimeSlots() {
     }
   }
   sel.innerHTML = html;
-  if (previous && !sel.querySelector(`option[value="${previous}"]`)?.disabled) sel.value = previous;
+  const prevOption = previous ? sel.querySelector(`option[value="${previous}"]`) : null;
+  if (previous && !(prevOption && prevOption.disabled)) sel.value = previous;
   else sel.value = (Array.from(sel.options).find(o => !o.disabled) || {}).value || "";
 }
 
@@ -48,7 +49,13 @@ async function init() {
     const all = await api("/services");
     service = all.find(s => s.id === serviceId);
     if (!service) { window.location.href = "services.html"; return; }
-    $("page-title").textContent = `Book: ${service.service_name}`;
+    const pageTitle = $("page-title");
+    pageTitle.removeAttribute("data-i18n");
+    pageTitle.textContent = "";
+    const bookPrefix = document.createElement("span");
+    setI18nText(bookPrefix, "book_service.book_prefix", "Book:");
+    pageTitle.appendChild(bookPrefix);
+    pageTitle.appendChild(document.createTextNode(" " + service.service_name));
   } catch (err) {
     showToast(err.message, "error");
     return;
@@ -100,7 +107,7 @@ function initMap() {
 
 function focusMap() {
   $("map").scrollIntoView({ behavior: "smooth", block: "center" });
-  showToast("Tap anywhere on the map to drop your pin");
+  showToast(t("book_service.map_toast", "Tap anywhere on the map to drop your pin"));
 }
 
 function placeMarker(lat, lng) {
@@ -115,10 +122,10 @@ function placeMarker(lat, lng) {
   }
 }
 
-function setLocStatus(kind, text) {
+function setLocStatus(kind, key, fallback) {
   const el = $("loc-status");
   el.className = "loc-status " + kind;
-  el.textContent = text;
+  setI18nText(el, key, fallback);
 }
 
 async function reverseGeocode(lat, lng) {
@@ -139,7 +146,7 @@ async function setLocation(lat, lng, moveMap = true) {
   selected = { lat, lng, inBengaluru: false, checking: true };
   placeMarker(lat, lng);
   if (moveMap) map.setView([lat, lng], 16);
-  setLocStatus("wait", "Checking your location…");
+  setLocStatus("wait", "book_service.loc_checking", "Checking your location…");
   updateConfirmState();
 
   const [check, address] = await Promise.all([
@@ -154,37 +161,38 @@ async function setLocation(lat, lng, moveMap = true) {
   $("address").value = address || `Latitude ${lat.toFixed(5)}, Longitude ${lng.toFixed(5)}`;
   selected.checking = false;
   if (!check) {
-    setLocStatus("err", "Could not verify your location. Please try again.");
+    setLocStatus("err", "book_service.loc_fail", "Could not verify your location. Please try again.");
   } else if (check.in_bengaluru) {
     selected.inBengaluru = true;
-    setLocStatus("ok", "✔ Your location is within Bengaluru.");
+    setLocStatus("ok", "book_service.loc_ok", "✔ Your location is within Bengaluru.");
   } else {
-    setLocStatus("err", "Home service is currently available only within Bengaluru.");
+    setLocStatus("err", "book_service.loc_outside", "Home service is currently available only within Bengaluru.");
   }
   updateConfirmState();
 }
 
 function useMyLocation() {
   if (!navigator.geolocation) {
-    showToast("Your browser does not support GPS location.", "error");
+    showToast(t("book_service.gps_unsupported", "Your browser does not support GPS location."), "error");
     return;
   }
   const btn = $("btn-gps");
   btn.disabled = true;
-  btn.textContent = "Getting location…";
+  setI18nText(btn, "book_service.getting_location", "Getting location…");
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       btn.disabled = false;
-      btn.textContent = "🎯 Use My Current Location";
+      setI18nText(btn, "book_service.use_location", "🎯 Use My Current Location");
       setLocation(pos.coords.latitude, pos.coords.longitude);
     },
     (err) => {
       btn.disabled = false;
-      btn.textContent = "🎯 Use My Current Location";
-      const msg = err.code === 1
-        ? "Location permission was denied. Allow location access, or pick a point on the map."
-        : "Could not get your location. Please pick a point on the map.";
-      setLocStatus("err", msg);
+      setI18nText(btn, "book_service.use_location", "🎯 Use My Current Location");
+      if (err.code === 1) {
+        setLocStatus("err", "book_service.gps_denied", "Location permission was denied. Allow location access, or pick a point on the map.");
+      } else {
+        setLocStatus("err", "book_service.gps_failed", "Could not get your location. Please pick a point on the map.");
+      }
     },
     { enableHighAccuracy: true, timeout: 15000 }
   );
@@ -204,13 +212,15 @@ async function refreshQuote() {
       },
     });
     lastQuote = q;
+    const durHours = $("duration").value;
+    const durUnit = parseFloat(durHours) === 1 ? t("common.hour", "hr") : t("common.hours", "hr");
     const rows = [
-      `<div class="summary-row"><span>Rate per hour (1st dog)</span><span>${formatPrice(q.hourly_rate)}</span></div>`,
-      `<div class="summary-row"><span>1st dog × ${$("duration").value} hr</span><span>${formatPrice(q.first_dog)}</span></div>`,
+      `<div class="summary-row"><span data-i18n="book_service.rate_hour">Rate per hour (1st dog)</span><span>${formatPrice(q.hourly_rate)}</span></div>`,
+      `<div class="summary-row"><span><span data-i18n="book_service.first_dog">1st dog ×</span> ${durHours} ${durUnit}</span><span>${formatPrice(q.first_dog)}</span></div>`,
     ];
-    if (q.additional_dogs > 0) rows.push(`<div class="summary-row"><span>Additional dogs (70% each)</span><span>${formatPrice(q.additional_dogs)}</span></div>`);
-    if (q.travel_fee > 0) rows.push(`<div class="summary-row"><span>Home visit fee</span><span>${formatPrice(q.travel_fee)}</span></div>`);
-    rows.push(`<div class="summary-total"><span>Total</span><span>${formatPrice(q.total)}</span></div>`);
+    if (q.additional_dogs > 0) rows.push(`<div class="summary-row"><span data-i18n="book_service.extra_dogs">Additional dogs (70% each)</span><span>${formatPrice(q.additional_dogs)}</span></div>`);
+    if (q.travel_fee > 0) rows.push(`<div class="summary-row"><span data-i18n="book_service.home_visit_fee">Home visit fee</span><span>${formatPrice(q.travel_fee)}</span></div>`);
+    rows.push(`<div class="summary-total"><span data-i18n="common.total">Total</span><span>${formatPrice(q.total)}</span></div>`);
     $("price-box").innerHTML = rows.join("");
   } catch (err) {
     lastQuote = null;
@@ -232,7 +242,7 @@ async function confirmBooking() {
   errorEl.textContent = "";
   const btn = $("confirm-btn");
   btn.disabled = true;
-  btn.textContent = "Booking…";
+  setI18nText(btn, "book_service.booking_now", "Booking…");
 
   const body = {
     service_id: service.id,
@@ -250,12 +260,12 @@ async function confirmBooking() {
   }
 
   const payment = getPaymentPayload("sb-payment");
-  if (!payment) { btn.disabled = false; btn.textContent = "Confirm Booking"; return; }
+  if (!payment) { btn.disabled = false; setI18nText(btn, "book_service.confirm_booking", "Confirm Booking"); return; }
   Object.assign(body, payment);
 
   try {
     const data = await api("/service-bookings", { method: "POST", body });
-    showToast("Booking confirmed!", "success");
+    showToast(t("book_service.booking_confirmed", "Booking confirmed!"), "success");
     setTimeout(() => {
       window.location.href = mode === "home"
         ? `track-service.html?id=${data.booking.id}`
@@ -263,7 +273,7 @@ async function confirmBooking() {
     }, 900);
   } catch (err) {
     errorEl.textContent = err.message;
-    btn.textContent = "Confirm Booking";
+    setI18nText(btn, "book_service.confirm_booking", "Confirm Booking");
     updateConfirmState();
   }
 }

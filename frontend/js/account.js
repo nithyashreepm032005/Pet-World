@@ -36,7 +36,7 @@ document.getElementById("account-form").addEventListener("submit", async (e) => 
       },
     });
     setSession(getToken(), user);
-    successEl.textContent = "Profile updated successfully!";
+    successEl.textContent = t("account.updated", "Profile updated successfully!");
     document.getElementById("sidebar-name").textContent = user.full_name;
   } catch (err) {
     errorEl.textContent = err.message;

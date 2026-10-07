@@ -49,10 +49,10 @@ async function renderDogsTab() {
   const el = document.getElementById("tab-content");
   el.innerHTML = `
     <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
-      <button class="btn btn-primary" onclick="openBreedModal()">+ Add Breed</button>
+      <button class="btn btn-primary" onclick="openBreedModal()" data-i18n="admin.add_breed">+ Add Breed</button>
     </div>
     <table class="admin-table">
-      <thead><tr><th>Image</th><th>Breed</th><th>Gender</th><th>Color</th><th>Vaccination</th><th>Availability</th><th>Age/Price Options</th><th>Actions</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_breed">Breed</th><th data-i18n="admin.th_gender">Gender</th><th data-i18n="admin.th_color">Color</th><th data-i18n="admin.th_vaccination">Vaccination</th><th data-i18n="admin.th_availability">Availability</th><th data-i18n="admin.th_age_price">Age/Price Options</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
       <tbody>
         ${cachedDogs.map(b => `
           <tr>
@@ -61,14 +61,14 @@ async function renderDogsTab() {
             <td>${b.gender || "-"}</td>
             <td>${b.color || "-"}</td>
             <td>${b.vaccination_status || "-"}</td>
-            <td>${b.availability ? "✅ Available" : "❌ Unavailable"}</td>
+            <td>${b.availability ? '✅ <span data-i18n="common.available">Available</span>' : '❌ <span data-i18n="common.unavailable">Unavailable</span>'}</td>
             <td>
-              ${b.variants.map(v => `<div>${v.age_months} mo — ${formatPrice(v.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deleteVariant(${v.id})">✕</span></div>`).join("") || "None"}
-              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openVariantModal(${b.id})">+ Add Age</button>
+              ${b.variants.map(v => `<div>${v.age_months} ${t("admin.age_mo", "mo")} — ${formatPrice(v.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deleteVariant(${v.id})">✕</span></div>`).join("") || t("admin.none", "None")}
+              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openVariantModal(${b.id})" data-i18n="admin.add_age">+ Add Age</button>
             </td>
             <td>
-              <button class="btn btn-sm btn-outline" onclick="openBreedModal(${b.id})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteBreed(${b.id})">Delete</button>
+              <button class="btn btn-sm btn-outline" onclick="openBreedModal(${b.id})" data-i18n="admin.edit">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteBreed(${b.id})" data-i18n="admin.delete">Delete</button>
             </td>
           </tr>
         `).join("")}
@@ -82,7 +82,11 @@ function openBreedModal(breedId = null) {
   form.reset();
   document.getElementById("breed-error").textContent = "";
   document.getElementById("breed-id").value = breedId || "";
-  document.getElementById("breed-modal-title").textContent = breedId ? "Edit Breed" : "Add Breed";
+  setI18nText(
+    document.getElementById("breed-modal-title"),
+    breedId ? "admin.edit_breed_title" : "admin.add_breed_title",
+    breedId ? "Edit Breed" : "Add Breed"
+  );
 
   if (breedId) {
     const b = cachedDogs.find(x => x.id === breedId);
@@ -117,7 +121,7 @@ document.getElementById("breed-form").addEventListener("submit", async (e) => {
       await api("/admin/dogs", { method: "POST", body: payload });
     }
     closeModal("breed-modal");
-    showToast("Breed saved!", "success");
+    showToast(t("admin.breed_saved", "Breed saved!"), "success");
     renderTab();
   } catch (err) {
     errorEl.textContent = err.message;
@@ -125,10 +129,10 @@ document.getElementById("breed-form").addEventListener("submit", async (e) => {
 });
 
 async function deleteBreed(id) {
-  if (!confirm("Delete this breed and all its age options?")) return;
+  if (!confirm(t("admin.confirm_delete_breed", "Delete this breed and all its age options?"))) return;
   try {
     await api(`/admin/dogs/${id}`, { method: "DELETE" });
-    showToast("Breed deleted");
+    showToast(t("admin.breed_deleted", "Breed deleted"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -150,16 +154,16 @@ document.getElementById("variant-form").addEventListener("submit", async (e) => 
       body: { age_months: Number(document.getElementById("v-age").value), price: Number(document.getElementById("v-price").value) },
     });
     closeModal("variant-modal");
-    showToast("Age option added!", "success");
+    showToast(t("admin.variant_added", "Age option added!"), "success");
     renderTab();
   } catch (err) { errorEl.textContent = err.message; }
 });
 
 async function deleteVariant(id) {
-  if (!confirm("Remove this age/price option?")) return;
+  if (!confirm(t("admin.confirm_remove_variant", "Remove this age/price option?"))) return;
   try {
     await api(`/admin/dog-variants/${id}`, { method: "DELETE" });
-    showToast("Removed");
+    showToast(t("my_dogs.removed", "Removed"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -170,10 +174,10 @@ async function renderFoodTab() {
   const el = document.getElementById("tab-content");
   el.innerHTML = `
     <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
-      <button class="btn btn-primary" onclick="openFoodModal()">+ Add Product</button>
+      <button class="btn btn-primary" onclick="openFoodModal()" data-i18n="admin.add_product">+ Add Product</button>
     </div>
     <table class="admin-table">
-      <thead><tr><th>Image</th><th>Product</th><th>Brand</th><th>Category</th><th>Weight/Price Options</th><th>Actions</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_product">Product</th><th data-i18n="admin.th_brand">Brand</th><th data-i18n="admin.th_category">Category</th><th data-i18n="admin.th_weight_price">Weight/Price Options</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
       <tbody>
         ${cachedFood.map(p => `
           <tr>
@@ -182,12 +186,12 @@ async function renderFoodTab() {
             <td>${p.brand}</td>
             <td>${p.category || "-"}</td>
             <td>
-              ${p.variants.map(v => `<div>${v.weight_kg} KG — ${formatPrice(v.price)} (stock: ${v.stock}) <span style="cursor:pointer;color:var(--danger)" onclick="deleteFoodVariant(${v.id})">✕</span></div>`).join("") || "None"}
-              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openFoodVariantModal(${p.id})">+ Add Weight</button>
+              ${p.variants.map(v => `<div>${v.weight_kg} KG — ${formatPrice(v.price)} (${t("admin.stock", "stock")}: ${v.stock}) <span style="cursor:pointer;color:var(--danger)" onclick="deleteFoodVariant(${v.id})">✕</span></div>`).join("") || t("admin.none", "None")}
+              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openFoodVariantModal(${p.id})" data-i18n="admin.add_weight">+ Add Weight</button>
             </td>
             <td>
-              <button class="btn btn-sm btn-outline" onclick="openFoodModal(${p.id})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteFood(${p.id})">Delete</button>
+              <button class="btn btn-sm btn-outline" onclick="openFoodModal(${p.id})" data-i18n="admin.edit">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteFood(${p.id})" data-i18n="admin.delete">Delete</button>
             </td>
           </tr>
         `).join("")}
@@ -201,7 +205,11 @@ function openFoodModal(foodId = null) {
   form.reset();
   document.getElementById("food-error").textContent = "";
   document.getElementById("food-id").value = foodId || "";
-  document.getElementById("food-modal-title").textContent = foodId ? "Edit Product" : "Add Food Product";
+  setI18nText(
+    document.getElementById("food-modal-title"),
+    foodId ? "admin.edit_food_title" : "admin.add_food_title",
+    foodId ? "Edit Product" : "Add Food Product"
+  );
 
   if (foodId) {
     const p = cachedFood.find(x => x.id === foodId);
@@ -231,16 +239,16 @@ document.getElementById("food-form").addEventListener("submit", async (e) => {
       await api("/admin/food", { method: "POST", body: payload });
     }
     closeModal("food-modal");
-    showToast("Product saved!", "success");
+    showToast(t("admin.product_saved", "Product saved!"), "success");
     renderTab();
   } catch (err) { errorEl.textContent = err.message; }
 });
 
 async function deleteFood(id) {
-  if (!confirm("Delete this food product and all its variants?")) return;
+  if (!confirm(t("admin.confirm_delete_food", "Delete this food product and all its variants?"))) return;
   try {
     await api(`/admin/food/${id}`, { method: "DELETE" });
-    showToast("Product deleted");
+    showToast(t("admin.product_deleted", "Product deleted"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -267,16 +275,16 @@ document.getElementById("food-variant-form").addEventListener("submit", async (e
       },
     });
     closeModal("food-variant-modal");
-    showToast("Weight option added!", "success");
+    showToast(t("admin.weight_added", "Weight option added!"), "success");
     renderTab();
   } catch (err) { errorEl.textContent = err.message; }
 });
 
 async function deleteFoodVariant(id) {
-  if (!confirm("Remove this weight/price option?")) return;
+  if (!confirm(t("admin.confirm_remove_food_variant", "Remove this weight/price option?"))) return;
   try {
     await api(`/admin/food-variants/${id}`, { method: "DELETE" });
-    showToast("Removed");
+    showToast(t("my_dogs.removed", "Removed"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -287,21 +295,22 @@ async function renderServicesTab() {
   const el = document.getElementById("tab-content");
   el.innerHTML = `
     <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
-      <button class="btn btn-primary" onclick="openServiceModal()">+ Add Service Category</button>
+      <button class="btn btn-primary" onclick="openServiceModal()" data-i18n="admin.add_service_cat">+ Add Service Category</button>
     </div>
     <table class="admin-table">
-      <thead><tr><th>Service</th><th>Packages</th><th>Actions</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_packages">Packages</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
       <tbody>
         ${cachedServices.map(s => `
           <tr>
+            <td>${thumb(resolveImageUrl(s.image), "🛁")}</td>
             <td><strong>${s.service_name}</strong><br><span class="card-meta">${s.description || ""}</span></td>
             <td>
-              ${s.packages.map(p => `<div>${p.package_name} (${p.duration}) — ${formatPrice(p.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deletePackage(${p.id})">✕</span></div>`).join("") || "None"}
-              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openPackageModal(${s.id})">+ Add Package</button>
+              ${s.packages.map(p => `<div>${p.package_name} (${p.duration}) — ${formatPrice(p.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deletePackage(${p.id})">✕</span></div>`).join("") || t("admin.none", "None")}
+              <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openPackageModal(${s.id})" data-i18n="admin.add_package">+ Add Package</button>
             </td>
             <td>
-              <button class="btn btn-sm btn-outline" onclick="openServiceModal(${s.id})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteService(${s.id})">Delete</button>
+              <button class="btn btn-sm btn-outline" onclick="openServiceModal(${s.id})" data-i18n="admin.edit">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteService(${s.id})" data-i18n="admin.delete">Delete</button>
             </td>
           </tr>
         `).join("")}
@@ -310,48 +319,82 @@ async function renderServicesTab() {
   `;
 }
 
+function renderServiceImagePreview(imagePath, emoji = "🛁") {
+  const box = document.getElementById("s-image-preview");
+  if (!box) return;
+  const src = resolveImageUrl(imagePath);
+  box.innerHTML =
+    `<span style="position:absolute; font-size:44px;">${emoji}</span>` +
+    (src ? `<img src="${src}" alt="" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" onerror="pwImgError(this)">` : "");
+}
+
 function openServiceModal(serviceId = null) {
   const form = document.getElementById("service-form");
   form.reset();
   document.getElementById("service-error").textContent = "";
   document.getElementById("service-id").value = serviceId || "";
-  document.getElementById("service-modal-title").textContent = serviceId ? "Edit Service" : "Add Service Category";
+  setI18nText(
+    document.getElementById("service-modal-title"),
+    serviceId ? "admin.edit_service_title" : "admin.add_service_title",
+    serviceId ? "Edit Service" : "Add Service Category"
+  );
 
+  let imagePath = "";
   if (serviceId) {
     const s = cachedServices.find(x => x.id === serviceId);
     document.getElementById("s-name").value = s.service_name;
     document.getElementById("s-desc").value = s.description || "";
     document.getElementById("s-image").value = s.image || "";
+    imagePath = s.image || "";
   }
+  renderServiceImagePreview(imagePath);
   document.getElementById("service-modal").style.display = "flex";
 }
+
+// Live preview of a newly chosen image file before it is saved.
+document.getElementById("s-image-file").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const box = document.getElementById("s-image-preview");
+  box.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">`;
+});
 
 document.getElementById("service-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const errorEl = document.getElementById("service-error");
   const serviceId = document.getElementById("service-id").value;
+  const fileInput = document.getElementById("s-image-file");
+  const file = fileInput.files[0];
   const payload = {
     service_name: document.getElementById("s-name").value.trim(),
     description: document.getElementById("s-desc").value.trim(),
     image: document.getElementById("s-image").value.trim(),
   };
   try {
+    let saved;
     if (serviceId) {
-      await api(`/admin/services/${serviceId}`, { method: "PUT", body: payload });
+      saved = await api(`/admin/services/${serviceId}`, { method: "PUT", body: payload });
     } else {
-      await api("/admin/services", { method: "POST", body: payload });
+      saved = await api("/admin/services", { method: "POST", body: payload });
     }
+    // A chosen file wins over the text path: save it and store its new path.
+    if (file && saved && saved.id) {
+      const fd = new FormData();
+      fd.append("image", file);
+      saved = await apiUpload(`/admin/services/${saved.id}/image`, fd);
+    }
+    fileInput.value = "";
     closeModal("service-modal");
-    showToast("Service saved!", "success");
+    showToast(t("admin.service_saved", "Service saved!"), "success");
     renderTab();
   } catch (err) { errorEl.textContent = err.message; }
 });
 
 async function deleteService(id) {
-  if (!confirm("Delete this service category and all its packages?")) return;
+  if (!confirm(t("admin.confirm_delete_service", "Delete this service category and all its packages?"))) return;
   try {
     await api(`/admin/services/${id}`, { method: "DELETE" });
-    showToast("Service deleted");
+    showToast(t("admin.service_deleted", "Service deleted"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -377,16 +420,16 @@ document.getElementById("package-form").addEventListener("submit", async (e) => 
       },
     });
     closeModal("package-modal");
-    showToast("Package added!", "success");
+    showToast(t("admin.package_added", "Package added!"), "success");
     renderTab();
   } catch (err) { errorEl.textContent = err.message; }
 });
 
 async function deletePackage(id) {
-  if (!confirm("Remove this package?")) return;
+  if (!confirm(t("admin.confirm_remove_package", "Remove this package?"))) return;
   try {
     await api(`/admin/service-packages/${id}`, { method: "DELETE" });
-    showToast("Removed");
+    showToast(t("my_dogs.removed", "Removed"));
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -396,12 +439,12 @@ async function renderCustomersTab() {
   const customers = await api("/admin/customers");
   const el = document.getElementById("tab-content");
   if (!customers.length) {
-    el.innerHTML = `<div class="empty-state"><div class="emoji">👥</div><h3>No customers yet</h3></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="emoji">👥</div><h3 data-i18n="admin.empty_customers">No customers yet</h3></div>`;
     return;
   }
   el.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th>User ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Address</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_user_id">User ID</th><th data-i18n="admin.th_name">Name</th><th data-i18n="admin.th_email">Email</th><th data-i18n="admin.th_phone">Phone</th><th data-i18n="admin.th_address">Address</th></tr></thead>
       <tbody>
         ${customers.map(c => `
           <tr><td>${c.user_id}</td><td>${c.full_name}</td><td>${c.email}</td><td>${c.phone}</td><td>${c.address || "-"}</td></tr>
@@ -418,18 +461,18 @@ async function renderOrdersTab() {
   const orders = await api("/admin/orders");
   const el = document.getElementById("tab-content");
   if (!orders.length) {
-    el.innerHTML = `<div class="empty-state"><div class="emoji">📦</div><h3>No orders yet</h3></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="emoji">📦</div><h3 data-i18n="admin.empty_orders">No orders yet</h3></div>`;
     return;
   }
   el.innerHTML = `
-    <p class="helper-text" style="margin-bottom:10px;">Setting an order to "Delivered" starts its 7-day return window automatically.</p>
+    <p class="helper-text" style="margin-bottom:10px;" data-i18n="admin.orders_helper">Setting an order to "Delivered" starts its 7-day return window automatically.</p>
     <table class="admin-table">
-      <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Delivery Address</th><th>Payment</th><th>Delivered At</th><th>Status</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_order_id">Order ID</th><th data-i18n="admin.th_items">Items</th><th data-i18n="admin.th_total">Total</th><th data-i18n="admin.th_delivery">Delivery Address</th><th data-i18n="admin.th_payment">Payment</th><th data-i18n="admin.th_delivered_at">Delivered At</th><th data-i18n="admin.th_status">Status</th></tr></thead>
       <tbody>
         ${orders.map(o => `
           <tr>
             <td>${o.order_id}</td>
-            <td>${o.items.map(i => (i.details && (i.details.breed_name || i.details.product_name)) || "Item").join(", ")}</td>
+            <td>${o.items.map(i => (i.details && (i.details.breed_name || i.details.product_name)) || t("common.item", "Item")).join(", ")}</td>
             <td>${formatPrice(o.total_amount)}</td>
             <td>${o.delivery_address}</td>
             <td>${o.payment_method || "COD"}</td>
@@ -449,7 +492,7 @@ async function renderOrdersTab() {
 async function updateOrderStatus(orderId, status) {
   try {
     await api(`/admin/orders/${orderId}/status`, { method: "PUT", body: { status } });
-    showToast("Order status updated!", "success");
+    showToast(t("admin.order_status_updated", "Order status updated!"), "success");
     renderTab();
   } catch (err) { showToast(err.message, "error"); }
 }
@@ -461,12 +504,12 @@ async function renderReturnsTab() {
   const returns = await api("/admin/returns");
   const el = document.getElementById("tab-content");
   if (!returns.length) {
-    el.innerHTML = `<div class="empty-state"><div class="emoji">↩</div><h3>No return requests yet</h3></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="emoji">↩</div><h3 data-i18n="admin.empty_returns">No return requests yet</h3></div>`;
     return;
   }
   el.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th>Order</th><th>Customer</th><th>Requested On</th><th>Reason</th><th>Status</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_order">Order</th><th data-i18n="admin.th_customer">Customer</th><th data-i18n="admin.th_requested_on">Requested On</th><th data-i18n="admin.th_reason">Reason</th><th data-i18n="admin.th_status">Status</th></tr></thead>
       <tbody>
         ${returns.map(r => `
           <tr>
@@ -489,7 +532,7 @@ async function renderReturnsTab() {
 async function updateReturnStatus(returnId, status) {
   try {
     await api(`/admin/returns/${returnId}/status`, { method: "PUT", body: { status } });
-    showToast("Return status updated!", "success");
+    showToast(t("admin.return_status_updated", "Return status updated!"), "success");
   } catch (err) { showToast(err.message, "error"); }
 }
 
@@ -500,12 +543,12 @@ async function renderBookingsTab() {
   const bookings = await api("/admin/bookings");
   const el = document.getElementById("tab-content");
   if (!bookings.length) {
-    el.innerHTML = `<div class="empty-state"><div class="emoji">🗓️</div><h3>No bookings yet</h3></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="emoji">🗓️</div><h3 data-i18n="admin.empty_bookings">No bookings yet</h3></div>`;
     return;
   }
   el.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th>Booking ID</th><th>Service</th><th>Package</th><th>Date</th><th>Time</th><th>Price</th><th>Status</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_booking_id">Booking ID</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_package">Package</th><th data-i18n="admin.th_date">Date</th><th data-i18n="admin.th_time">Time</th><th data-i18n="admin.th_price">Price</th><th data-i18n="admin.th_status">Status</th></tr></thead>
       <tbody>
         ${bookings.map(b => `
           <tr>
@@ -530,7 +573,7 @@ async function renderBookingsTab() {
 async function updateBookingStatus(bookingId, status) {
   try {
     await api(`/admin/bookings/${bookingId}/status`, { method: "PUT", body: { status } });
-    showToast("Booking status updated!", "success");
+    showToast(t("admin.booking_status_updated", "Booking status updated!"), "success");
   } catch (err) { showToast(err.message, "error"); }
 }
 

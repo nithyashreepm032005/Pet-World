@@ -39,6 +39,15 @@ class Config:
 
     PASSWORD_LENGTH = 8
     CORS_ORIGINS = "*"
+
+    # ---- AI Assistant (dashboard guide) ----
+    # Leave AI_API_KEY blank to run the assistant in built-in knowledge-base
+    # mode (works with no external service). The key is only ever used
+    # server-side and is never sent to the browser.
+    AI_API_KEY = os.environ.get("AI_API_KEY", "")
+    AI_BASE_URL = os.environ.get("AI_BASE_URL", "https://api.openai.com/v1")
+    AI_MODEL = os.environ.get("AI_MODEL", "gpt-4o-mini")
+    AI_TIMEOUT_SECONDS = int(os.environ.get("AI_TIMEOUT_SECONDS", "20"))
     # ---- Vaccination scheduling ----
     # Generic, configurable gap (in days) used to suggest a dog's next
     # vaccination date. This is a placeholder default, NOT medical advice -

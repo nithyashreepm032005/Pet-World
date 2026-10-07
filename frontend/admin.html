@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — Admin Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -12,19 +13,20 @@
 <div class="container">
   <div class="page-header">
     <div>
-      <a href="index.html" class="back-link" id="logout-link">🚪 Logout</a>
-      <h1>🐾 PetWorld Admin Dashboard</h1>
+      <a href="index.html" class="back-link" id="logout-link" data-i18n="admin.logout">🚪 Logout</a>
+      <h1 data-i18n="admin.title">🐾 PetWorld Admin Dashboard</h1>
     </div>
+    <div id="admin-lang"></div>
   </div>
 
   <div class="admin-tabs">
-    <div class="admin-tab active" data-tab="dogs" onclick="switchTab('dogs')">🐶 Dogs</div>
-    <div class="admin-tab" data-tab="food" onclick="switchTab('food')">🍖 Food</div>
-    <div class="admin-tab" data-tab="services" onclick="switchTab('services')">🛁 Services</div>
-    <div class="admin-tab" data-tab="customers" onclick="switchTab('customers')">👥 Customers</div>
-    <div class="admin-tab" data-tab="orders" onclick="switchTab('orders')">📦 Orders</div>
-    <div class="admin-tab" data-tab="returns" onclick="switchTab('returns')">↩ Returns</div>
-    <div class="admin-tab" data-tab="bookings" onclick="switchTab('bookings')">🗓️ Bookings</div>
+    <div class="admin-tab active" data-tab="dogs" onclick="switchTab('dogs')" data-i18n="admin.tab_dogs">🐶 Dogs</div>
+    <div class="admin-tab" data-tab="food" onclick="switchTab('food')" data-i18n="admin.tab_food">🍖 Food</div>
+    <div class="admin-tab" data-tab="services" onclick="switchTab('services')" data-i18n="admin.tab_services">🛁 Services</div>
+    <div class="admin-tab" data-tab="customers" onclick="switchTab('customers')" data-i18n="admin.tab_customers">👥 Customers</div>
+    <div class="admin-tab" data-tab="orders" onclick="switchTab('orders')" data-i18n="admin.tab_orders">📦 Orders</div>
+    <div class="admin-tab" data-tab="returns" onclick="switchTab('returns')" data-i18n="admin.tab_returns">↩ Returns</div>
+    <div class="admin-tab" data-tab="bookings" onclick="switchTab('bookings')" data-i18n="admin.tab_bookings">🗓️ Bookings</div>
   </div>
 
   <div id="tab-content" class="admin-table-wrap">
@@ -36,23 +38,23 @@
 <div class="modal-overlay" id="breed-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('breed-modal')">&times;</span>
-    <h2 id="breed-modal-title">Add Breed</h2>
+    <h2 id="breed-modal-title" data-i18n="admin.add_breed_title">Add Breed</h2>
     <form id="breed-form">
       <input type="hidden" id="breed-id">
-      <div class="form-group"><label>Breed Name</label><input id="b-name" required></div>
+      <div class="form-group"><label data-i18n="admin.breed_name">Breed Name</label><input id="b-name" required></div>
       <div class="form-row">
-        <div class="form-group"><label>Gender</label><input id="b-gender"></div>
-        <div class="form-group"><label>Color</label><input id="b-color"></div>
+        <div class="form-group"><label data-i18n="admin.gender">Gender</label><input id="b-gender"></div>
+        <div class="form-group"><label data-i18n="admin.color">Color</label><input id="b-color"></div>
       </div>
-      <div class="form-group"><label>Vaccination Status</label><input id="b-vacc"></div>
-      <div class="form-group"><label>Health Information</label><textarea id="b-health" rows="2"></textarea></div>
-      <div class="form-group"><label>Image path (relative to frontend/)</label><input id="b-image" placeholder="images/dogs/labrador_retriever.jpg"></div>
-      <div class="form-group"><label>Availability</label>
-        <select id="b-avail"><option value="true">Available</option><option value="false">Unavailable</option></select>
+      <div class="form-group"><label data-i18n="admin.vacc_status">Vaccination Status</label><input id="b-vacc"></div>
+      <div class="form-group"><label data-i18n="admin.health_info">Health Information</label><textarea id="b-health" rows="2"></textarea></div>
+      <div class="form-group"><label data-i18n="admin.image_path">Image path (relative to frontend/)</label><input id="b-image" placeholder="images/dogs/labrador_retriever.jpg"></div>
+      <div class="form-group"><label data-i18n="admin.availability">Availability</label>
+        <select id="b-avail"><option value="true" data-i18n="common.available">Available</option><option value="false" data-i18n="common.unavailable">Unavailable</option></select>
       </div>
-      <p class="helper-text">Age/price variants can be added after creating the breed, from the table below.</p>
+      <p class="helper-text" data-i18n="admin.helper_breed">Age/price variants can be added after creating the breed, from the table below.</p>
       <p class="error-text" id="breed-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Save Breed</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.save_breed">Save Breed</button>
     </form>
   </div>
 </div>
@@ -61,15 +63,15 @@
 <div class="modal-overlay" id="variant-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('variant-modal')">&times;</span>
-    <h2>Add Age/Price Option</h2>
+    <h2 data-i18n="admin.add_variant_title">Add Age/Price Option</h2>
     <form id="variant-form">
       <input type="hidden" id="variant-breed-id">
       <div class="form-row">
-        <div class="form-group"><label>Age (months)</label><input type="number" id="v-age" required></div>
-        <div class="form-group"><label>Price (₹)</label><input type="number" id="v-price" required></div>
+        <div class="form-group"><label data-i18n="admin.age_months">Age (months)</label><input type="number" id="v-age" required></div>
+        <div class="form-group"><label data-i18n="admin.price_inr">Price (₹)</label><input type="number" id="v-price" required></div>
       </div>
       <p class="error-text" id="variant-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Add</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.add">Add</button>
     </form>
   </div>
 </div>
@@ -78,16 +80,16 @@
 <div class="modal-overlay" id="food-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('food-modal')">&times;</span>
-    <h2 id="food-modal-title">Add Food Product</h2>
+    <h2 id="food-modal-title" data-i18n="admin.add_food_title">Add Food Product</h2>
     <form id="food-form">
       <input type="hidden" id="food-id">
-      <div class="form-group"><label>Product Name</label><input id="f-name" required></div>
-      <div class="form-group"><label>Category</label><input id="f-category"></div>
-      <div class="form-group"><label>Description</label><textarea id="f-desc" rows="2"></textarea></div>
-      <div class="form-group"><label>Image path (relative to frontend/)</label><input id="f-image" placeholder="images/food/premium_chicken_and_rice.jpg"></div>
-      <p class="helper-text">Weight/price variants can be added after creating the product, from the table below.</p>
+      <div class="form-group"><label data-i18n="admin.product_name">Product Name</label><input id="f-name" required></div>
+      <div class="form-group"><label data-i18n="admin.category">Category</label><input id="f-category"></div>
+      <div class="form-group"><label data-i18n="admin.description">Description</label><textarea id="f-desc" rows="2"></textarea></div>
+      <div class="form-group"><label data-i18n="admin.image_path">Image path (relative to frontend/)</label><input id="f-image" placeholder="images/food/premium_chicken_and_rice.jpg"></div>
+      <p class="helper-text" data-i18n="admin.helper_food">Weight/price variants can be added after creating the product, from the table below.</p>
       <p class="error-text" id="food-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Save Product</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.save_product">Save Product</button>
     </form>
   </div>
 </div>
@@ -96,16 +98,16 @@
 <div class="modal-overlay" id="food-variant-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('food-variant-modal')">&times;</span>
-    <h2>Add Weight/Price Option</h2>
+    <h2 data-i18n="admin.add_food_variant_title">Add Weight/Price Option</h2>
     <form id="food-variant-form">
       <input type="hidden" id="fv-food-id">
       <div class="form-row">
-        <div class="form-group"><label>Weight (KG)</label><input type="number" step="0.1" id="fv-weight" required></div>
-        <div class="form-group"><label>Price (₹)</label><input type="number" id="fv-price" required></div>
+        <div class="form-group"><label data-i18n="admin.weight_kg">Weight (KG)</label><input type="number" step="0.1" id="fv-weight" required></div>
+        <div class="form-group"><label data-i18n="admin.price_inr">Price (₹)</label><input type="number" id="fv-price" required></div>
       </div>
-      <div class="form-group"><label>Stock</label><input type="number" id="fv-stock" value="100"></div>
+      <div class="form-group"><label data-i18n="admin.stock">Stock</label><input type="number" id="fv-stock" value="100"></div>
       <p class="error-text" id="food-variant-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Add</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.add">Add</button>
     </form>
   </div>
 </div>
@@ -114,15 +116,21 @@
 <div class="modal-overlay" id="service-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('service-modal')">&times;</span>
-    <h2 id="service-modal-title">Add Service</h2>
+    <h2 id="service-modal-title" data-i18n="admin.add_service_title">Add Service</h2>
     <form id="service-form">
       <input type="hidden" id="service-id">
-      <div class="form-group"><label>Service Name</label><input id="s-name" required></div>
-      <div class="form-group"><label>Description</label><textarea id="s-desc" rows="2"></textarea></div>
-      <div class="form-group"><label>Image path (relative to frontend/)</label><input id="s-image" placeholder="images/services/grooming.jpg"></div>
-      <p class="helper-text">Packages can be added after creating the service, from the table below.</p>
+      <div class="form-group"><label data-i18n="admin.service_name">Service Name</label><input id="s-name" required></div>
+      <div class="form-group"><label data-i18n="admin.description">Description</label><textarea id="s-desc" rows="2"></textarea></div>
+      <div class="form-group">
+        <label data-i18n="admin.service_image">Service Image</label>
+        <div id="s-image-preview" style="width:100%; height:150px; border-radius:10px; overflow:hidden; background:#f0e4d8; display:flex; align-items:center; justify-content:center; margin-bottom:8px; position:relative;"></div>
+        <input type="file" id="s-image-file" accept="image/*">
+        <p class="helper-text" data-i18n="admin.image_upload_helper">Upload an image file, or set an image path/URL below. The customer page picks it up automatically.</p>
+      </div>
+      <div class="form-group"><label data-i18n="admin.image_path">Image path (relative to frontend/)</label><input id="s-image" placeholder="images/services/grooming1.jpg"></div>
+      <p class="helper-text" data-i18n="admin.helper_service">Packages can be added after creating the service, from the table below.</p>
       <p class="error-text" id="service-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Save Service</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.save_service">Save Service</button>
     </form>
   </div>
 </div>
@@ -131,21 +139,25 @@
 <div class="modal-overlay" id="package-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('package-modal')">&times;</span>
-    <h2>Add Package</h2>
+    <h2 data-i18n="admin.add_package_title">Add Package</h2>
     <form id="package-form">
       <input type="hidden" id="pkg-service-id">
-      <div class="form-group"><label>Package Name</label><input id="pkg-name" required></div>
+      <div class="form-group"><label data-i18n="admin.package_name">Package Name</label><input id="pkg-name" required></div>
       <div class="form-row">
-        <div class="form-group"><label>Duration</label><input id="pkg-duration"></div>
-        <div class="form-group"><label>Price (₹)</label><input type="number" id="pkg-price" required></div>
+        <div class="form-group"><label data-i18n="admin.duration">Duration</label><input id="pkg-duration"></div>
+        <div class="form-group"><label data-i18n="admin.price_inr">Price (₹)</label><input type="number" id="pkg-price" required></div>
       </div>
       <p class="error-text" id="package-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Add</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="admin.add">Add</button>
     </form>
   </div>
 </div>
 
-<script src="js/api.js?v=3"></script>
-<script src="js/admin.js?v=2"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
+<script src="js/admin.js?v=3"></script>
+<script>
+  document.getElementById("admin-lang").innerHTML = pwLangSelectHTML();
+</script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

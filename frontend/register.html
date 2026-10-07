@@ -12,37 +12,42 @@
 <div class="auth-wrapper">
   <div class="auth-card" style="max-width:480px;">
     <div class="auth-logo">🐾 PetWorld</div>
-    <p class="auth-tagline">Create your account to get started</p>
+    <p class="auth-tagline" data-i18n="register.tagline">Create your account to get started</p>
 
     <form id="register-form" style="text-align:left;">
       <div class="form-group">
-        <label for="full_name">Full Name</label>
+        <label for="full_name" data-i18n="common.full_name">Full Name</label>
         <input type="text" id="full_name" required>
       </div>
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="phone" data-i18n="common.phone_number">Phone Number</label>
+        <input type="tel" id="phone" placeholder="10-digit mobile number" required>
+      </div>
+      <div class="form-group">
+        <label for="email" data-i18n="common.email">Email</label>
         <input type="email" id="email" required>
-        <p class="helper-text">Your User ID will be sent here — not shown on screen.</p>
+        <p class="helper-text" data-i18n="register.email_helper">Used for booking and account updates — never for your User ID.</p>
       </div>
       <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input type="tel" id="phone" required>
+        <label for="user_id" data-i18n="register.user_id">User ID</label>
+        <input type="text" id="user_id" maxlength="20" placeholder="Choose your User ID" required autocomplete="username">
+        <p class="helper-text" data-i18n="register.user_id_helper">4–20 characters: letters, numbers, '-' or '_'. You'll log in with this.</p>
       </div>
       <div class="form-group">
-        <label for="address">Address</label>
+        <label for="address" data-i18n="account.address">Address</label>
         <textarea id="address" rows="2" required></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password" data-i18n="login.password">Password</label>
           <div class="password-wrapper">
             <input type="password" id="password" minlength="8" maxlength="8" required>
             <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">👁️</button>
           </div>
-          <p class="helper-text">Must be exactly 8 characters</p>
+          <p class="helper-text" data-i18n="register.password_helper">Must be exactly 8 characters</p>
         </div>
         <div class="form-group">
-          <label for="confirm_password">Confirm Password</label>
+          <label for="confirm_password" data-i18n="register.confirm_password">Confirm Password</label>
           <div class="password-wrapper">
             <input type="password" id="confirm_password" minlength="8" maxlength="8" required>
             <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirm_password', this)">👁️</button>
@@ -51,16 +56,16 @@
       </div>
       <p class="error-text" id="register-error"></p>
       <p class="success-text" id="register-success"></p>
-      <button type="submit" class="btn btn-primary btn-block" id="register-btn">Register</button>
+      <button type="submit" class="btn btn-primary btn-block" id="register-btn" data-i18n="register.register_btn">Register</button>
     </form>
 
     <div class="auth-switch">
-      Already have an account? <a href="index.html">Login here</a>
+      <span data-i18n="register.already">Already have an account?</span> <a href="index.html" data-i18n="register.login_here">Login here</a>
     </div>
   </div>
 </div>
 
-<script src="js/api.js?v=3"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script>
   document.getElementById("register-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -72,33 +77,54 @@
 
     const payload = {
       full_name: document.getElementById("full_name").value.trim(),
-      email: document.getElementById("email").value.trim(),
       phone: document.getElementById("phone").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      user_id: document.getElementById("user_id").value.trim(),
       address: document.getElementById("address").value.trim(),
       password: document.getElementById("password").value,
       confirm_password: document.getElementById("confirm_password").value,
     };
 
+    // ---- Client-side validation (the server re-checks everything) ----
+    if (!/^[A-Za-z0-9_-]{4,20}$/.test(payload.user_id)) {
+      errorEl.textContent = t("register.err_user_id", "User ID must be 4-20 characters and may only contain letters, numbers, '-' and '_'.");
+      return;
+    }
+    let phoneDigits = payload.phone.replace(/[\s\-]/g, "");
+    if (phoneDigits.startsWith("+91")) phoneDigits = phoneDigits.slice(3);
+    else if (phoneDigits.startsWith("91") && phoneDigits.length === 12) phoneDigits = phoneDigits.slice(2);
+    if (!/^\d{10}$/.test(phoneDigits)) {
+      errorEl.textContent = t("register.err_phone", "Please enter a valid 10-digit phone number.");
+      return;
+    }
     if (payload.password.length !== 8) {
-      errorEl.textContent = "Password must be exactly 8 characters.";
+      errorEl.textContent = t("register.err_length", "Password must be exactly 8 characters.");
+      return;
+    }
+    if (payload.password !== payload.confirm_password) {
+      errorEl.textContent = t("register.err_match", "Passwords do not match.");
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = "Registering...";
+    btn.textContent = t("register.registering", "Registering...");
 
     try {
       const data = await api("/auth/register", { method: "POST", auth: false, body: payload });
-      // The User ID is sent by email - intentionally NOT shown here.
-      successEl.textContent = data.message;
+      // Registration succeeded -> show the message, then send the customer
+      // straight to the login page (the login page repeats this message).
+      sessionStorage.setItem("pw_reg_success", "1");
+      successEl.textContent = data.message || t("register.success", "Registration successful. Please login using your User ID and password.");
       document.getElementById("register-form").reset();
-      setTimeout(() => (window.location.href = "index.html"), 3500);
+      setTimeout(() => (window.location.href = "index.html"), 1800);
     } catch (err) {
       errorEl.textContent = err.message;
       btn.disabled = false;
-      btn.textContent = "Register";
+      btn.textContent = t("register.register_btn", "Register");
     }
   });
 </script>
+<div id="auth-lang" style="position:fixed; top:14px; right:16px; z-index:60;"></div>
+<script>document.getElementById("auth-lang").innerHTML = pwLangSelectHTML();</script>
 </body>
 </html>

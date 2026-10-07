@@ -9,7 +9,7 @@ async function loadOrders() {
   try {
     const orders = await api("/orders");
     if (!orders.length) {
-      el.innerHTML = `<div class="empty-state"><div class="emoji">📦</div><h3>No orders yet</h3><p>Your dog and food orders will show up here.</p><a href="home.html" class="btn btn-primary" style="margin-top:14px;">Start Shopping</a></div>`;
+      el.innerHTML = `<div class="empty-state"><div class="emoji">📦</div><h3 data-i18n="orders.empty_title">No orders yet</h3><p data-i18n="orders.empty_text">Your dog and food orders will show up here.</p><a href="home.html" class="btn btn-primary" style="margin-top:14px;" data-i18n="common.start_shopping">Start Shopping</a></div>`;
       return;
     }
     el.innerHTML = orders.map(renderOrder).join("");
@@ -26,8 +26,10 @@ function formatDeadline(iso) {
 function renderOrder(order) {
   const itemsHtml = order.items.map(i => {
     const d = i.details || {};
-    const name = d.breed_name || d.product_name || "Item";
-    const extra = i.selected_age ? `Age: ${i.selected_age} mo` : (i.selected_weight ? `Weight: ${i.selected_weight} KG` : "");
+    const name = d.breed_name || d.product_name || t("common.item", "Item");
+    const extra = i.selected_age
+      ? `<span data-i18n="common.age">Age</span>: ${i.selected_age} <span data-i18n="orders.age_mo">mo</span>`
+      : (i.selected_weight ? `<span data-i18n="common.weight">Weight</span>: ${i.selected_weight} KG` : "");
     return `<div class="summary-row"><span>${name} ${extra ? "(" + extra + ")" : ""} x${i.quantity}</span><span>${formatPrice(i.price * i.quantity)}</span></div>`;
   }).join("");
 
@@ -35,17 +37,17 @@ function renderOrder(order) {
   let cancelSection = "";
   if (order.can_cancel) {
     cancelSection = `
-      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="cancelOrder(${order.id})">❌ Cancel Order</button>
-      <p class="helper-text">You can cancel until ${formatDeadline(order.cancel_deadline)} (24 hours after placing the order).</p>`;
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="cancelOrder(${order.id})" data-i18n="orders.cancel_order">❌ Cancel Order</button>
+      <p class="helper-text"><span data-i18n="orders.cancel_until">You can cancel until</span> ${formatDeadline(order.cancel_deadline)} <span data-i18n="orders.cancel_24h">(24 hours after placing the order).</span></p>`;
   } else if (order.status !== "Cancelled" && order.status !== "Delivered") {
-    cancelSection = `<p class="helper-text">Cancellation window closed on ${formatDeadline(order.cancel_deadline)}.</p>`;
+    cancelSection = `<p class="helper-text"><span data-i18n="orders.cancel_closed_on">Cancellation window closed on</span> ${formatDeadline(order.cancel_deadline)}.</p>`;
   }
 
   // ---- Return ----
   let returnSection = "";
   if (order.contains_dog) {
     if (order.status === "Delivered") {
-      returnSection = `<p class="helper-text">🐾 This order includes a live dog. Dogs can't be returned through this page — please contact PetWorld support directly if there's an issue.</p>`;
+      returnSection = `<p class="helper-text" data-i18n="orders.dog_return_note">🐾 This order includes a live dog. Dogs can't be returned through this page — please contact PetWorld support directly if there's an issue.</p>`;
     }
   } else if (order.return_request) {
     const rr = order.return_request;
@@ -53,27 +55,27 @@ function renderOrder(order) {
       Pending: "status-Pending", Approved: "status-Confirmed",
       Rejected: "status-Cancelled", Completed: "status-Delivered",
     }[rr.status] || "status-Pending";
-    returnSection = `<p class="helper-text">Return request: <span class="status-badge ${badgeClass}">${rr.status}</span> (submitted ${formatDeadline(rr.request_date)})</p>`;
+    returnSection = `<p class="helper-text"><span data-i18n="orders.return_request">Return request:</span> <span class="status-badge ${badgeClass}">${rr.status}</span> <span data-i18n="orders.return_submitted">(submitted</span> ${formatDeadline(rr.request_date)})</p>`;
   } else if (order.can_return) {
     returnSection = `
-      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="openReturnModal(${order.id})">↩ Request Return</button>
-      <p class="helper-text">Eligible for return until ${formatDeadline(order.return_deadline)} (7 days after delivery).</p>`;
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="openReturnModal(${order.id})" data-i18n="orders.request_return">↩ Request Return</button>
+      <p class="helper-text"><span data-i18n="orders.return_eligible_until">Eligible for return until</span> ${formatDeadline(order.return_deadline)} <span data-i18n="orders.return_7days">(7 days after delivery).</span></p>`;
   } else if (order.status === "Delivered" && order.return_deadline) {
-    returnSection = `<p class="helper-text">Return window closed on ${formatDeadline(order.return_deadline)}.</p>`;
+    returnSection = `<p class="helper-text"><span data-i18n="orders.return_closed_on">Return window closed on</span> ${formatDeadline(order.return_deadline)}.</p>`;
   }
 
   return `
     <div class="list-card">
       <div class="list-card-head">
-        <h4>Order #${order.order_id}</h4>
+        <h4><span data-i18n="orders.order_no">Order #</span>${order.order_id}</h4>
         <span class="status-badge status-${order.status}">${order.status}</span>
       </div>
-      <p class="card-meta">Placed on ${new Date(order.order_date).toLocaleString()}</p>
-      ${order.delivered_at ? `<p class="card-meta">Delivered on ${formatDeadline(order.delivered_at)}</p>` : ""}
-      <p class="card-meta">Deliver to: ${order.delivery_address}</p>
-      <p class="card-meta">💳 Paid via: ${order.payment_method || "COD"} ${order.payment_reference ? "(" + order.payment_reference + ")" : ""}</p>
+      <p class="card-meta"><span data-i18n="orders.placed_on">Placed on</span> ${new Date(order.order_date).toLocaleString()}</p>
+      ${order.delivered_at ? `<p class="card-meta"><span data-i18n="orders.delivered_on">Delivered on</span> ${formatDeadline(order.delivered_at)}</p>` : ""}
+      <p class="card-meta"><span data-i18n="orders.deliver_to">Deliver to:</span> ${order.delivery_address}</p>
+      <p class="card-meta"><span data-i18n="common.paid_via">💳 Paid via:</span> ${order.payment_method || "COD"} ${order.payment_reference ? "(" + order.payment_reference + ")" : ""}</p>
       <div style="margin:10px 0;">${itemsHtml}</div>
-      <div class="summary-total" style="margin:0; border:0; padding:0;"><span>Total</span><span>${formatPrice(order.total_amount)}</span></div>
+      <div class="summary-total" style="margin:0; border:0; padding:0;"><span data-i18n="common.total">Total</span><span>${formatPrice(order.total_amount)}</span></div>
       ${cancelSection}
       ${returnSection}
     </div>
@@ -81,10 +83,10 @@ function renderOrder(order) {
 }
 
 async function cancelOrder(orderId) {
-  if (!confirm("Are you sure you want to cancel this order?")) return;
+  if (!confirm(t("orders.cancel_confirm", "Are you sure you want to cancel this order?"))) return;
   try {
     await api(`/orders/${orderId}/cancel`, { method: "POST" });
-    showToast("Order cancelled.", "success");
+    showToast(t("orders.cancelled", "Order cancelled."), "success");
     loadOrders();
   } catch (err) {
     showToast(err.message, "error");
@@ -109,7 +111,7 @@ async function submitReturn() {
   errorEl.textContent = "";
   try {
     await api(`/orders/${activeReturnOrderId}/return`, { method: "POST", body: { reason } });
-    showToast("Return request submitted.", "success");
+    showToast(t("orders.return_done", "Return request submitted."), "success");
     closeReturnModal();
     loadOrders();
   } catch (err) {

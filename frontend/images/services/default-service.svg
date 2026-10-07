@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" role="img" aria-label="PetWorld service">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe3ee"/>
+      <stop offset="55%" stop-color="#ffd0e0"/>
+      <stop offset="100%" stop-color="#e9dcff"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg)"/>
+  <g fill="#ff6b9d" opacity="0.9">
+    <ellipse cx="400" cy="300" rx="78" ry="62"/>
+    <ellipse cx="316" cy="212" rx="34" ry="44" transform="rotate(-18 316 212)"/>
+    <ellipse cx="372" cy="176" rx="32" ry="44" transform="rotate(-6 372 176)"/>
+    <ellipse cx="428" cy="176" rx="32" ry="44" transform="rotate(6 428 176)"/>
+    <ellipse cx="484" cy="212" rx="34" ry="44" transform="rotate(18 484 212)"/>
+  </g>
+  <text x="400" y="418" text-anchor="middle" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="44" font-weight="700" fill="#3b2a44">PetWorld</text>
+  <text x="400" y="462" text-anchor="middle" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="24" font-weight="500" fill="#7a6a86">Pet Care Service</text>
+</svg>

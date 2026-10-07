@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — Food</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -14,8 +15,8 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="home.html" class="back-link">← Back to Home</a>
-      <h1>MBN Premium Dog Food 🍖</h1>
+      <a href="home.html" class="back-link" data-i18n="common.back_home">← Back to Home</a>
+      <h1 data-i18n="food.title">MBN Premium Dog Food 🍖</h1>
     </div>
   </div>
 
@@ -27,41 +28,42 @@
 <div class="modal-overlay" id="buy-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeBuyModal()">&times;</span>
-    <h2>Delivery Details</h2>
+    <h2 data-i18n="common.delivery_details">Delivery Details</h2>
     <form id="buy-form">
-      <div class="form-group"><label>Full Name</label><input id="bf-name" required></div>
+      <div class="form-group"><label data-i18n="common.full_name">Full Name</label><input id="bf-name" required></div>
       <div class="form-row">
-        <div class="form-group"><label>Phone Number</label><input id="bf-phone" placeholder="10-digit number" required></div>
-        <div class="form-group"><label>Email</label><input type="email" id="bf-email" placeholder="Optional, for order updates"></div>
+        <div class="form-group"><label data-i18n="common.phone_number">Phone Number</label><input id="bf-phone" data-i18n-ph="common.ph_phone" placeholder="10-digit number" required></div>
+        <div class="form-group"><label data-i18n="common.email">Email</label><input type="email" id="bf-email" data-i18n-ph="common.ph_email" placeholder="Optional, for order updates"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>House/Flat No.</label><input id="bf-house" required></div>
-        <div class="form-group"><label>Street</label><input id="bf-street" required></div>
+        <div class="form-group"><label data-i18n="common.house_flat">House/Flat No.</label><input id="bf-house" required></div>
+        <div class="form-group"><label data-i18n="common.street">Street</label><input id="bf-street" required></div>
       </div>
-      <div class="form-group"><label>Area</label><input id="bf-area" required></div>
+      <div class="form-group"><label data-i18n="common.area">Area</label><input id="bf-area" required></div>
       <div class="form-row">
         <div class="form-group">
-          <label>City</label>
+          <label data-i18n="common.city">City</label>
           <select id="bf-city" required></select>
         </div>
-        <div class="form-group"><label>State</label><input id="bf-state" value="Karnataka" disabled></div>
+        <div class="form-group"><label data-i18n="common.state">State</label><input id="bf-state" value="Karnataka" disabled></div>
       </div>
-      <div class="form-group"><label>PIN Code</label><input id="bf-pincode" placeholder="e.g. 560001" maxlength="6" required></div>
+      <div class="form-group"><label data-i18n="common.pincode">PIN Code</label><input id="bf-pincode" data-i18n-ph="common.ph_pincode" placeholder="e.g. 560001" maxlength="6" required></div>
       <hr style="border:none; border-top:2px dashed #f0e4d8; margin:16px 0;">
       <div id="bf-payment"></div>
       <p class="error-text" id="buy-error"></p>
-      <button class="btn btn-primary btn-block" type="submit">Confirm Purchase</button>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="common.confirm_purchase">Confirm Purchase</button>
     </form>
   </div>
 </div>
 
-<footer>🐾 PetWorld — Nutritious MBN food, delivered fresh.</footer>
+<footer data-i18n="food.footer">🐾 PetWorld — Nutritious MBN food, delivered fresh.</footer>
 
-<script src="js/api.js?v=3"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/food.js?v=4"></script>
 <script>
   document.getElementById("bf-city").innerHTML = karnatakaCityOptionsHTML();
   document.getElementById("bf-payment").innerHTML = paymentSectionHTML("bf-payment");
 </script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

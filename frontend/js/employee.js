@@ -4,11 +4,11 @@ const EMP_TOKEN = "pw_emp_token";
 const EMP_NAME = "pw_emp_name";
 const ACTIVE = ["On the Way", "Arrived", "Service Started"];
 const NEXT = {
-  "Booking Confirmed": { action: "accept", label: "✔ Accept Booking" },
-  "Employee Assigned": { action: "start-travel", label: "🚗 Start Travel" },
-  "On the Way": { action: "arrived", label: "📍 Mark Arrived" },
-  "Arrived": { action: "start-service", label: "▶ Start Service" },
-  "Service Started": { action: "complete", label: "✅ Complete Service" },
+  "Booking Confirmed": { action: "accept", label: "✔ Accept Booking", key: "employee.accept_booking" },
+  "Employee Assigned": { action: "start-travel", label: "🚗 Start Travel", key: "employee.start_travel" },
+  "On the Way": { action: "arrived", label: "📍 Mark Arrived", key: "employee.mark_arrived" },
+  "Arrived": { action: "start-service", label: "▶ Start Service", key: "employee.start_service" },
+  "Service Started": { action: "complete", label: "✅ Complete Service", key: "employee.complete_service" },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -43,7 +43,7 @@ async function empApi(path, { method = "GET", body = null, auth = true } = {}) {
       body: body ? JSON.stringify(body) : null
     });
   } catch (e) {
-    throw new Error("Could not reach the PetWorld server. Is Flask running?");
+    throw new Error(t("employee.server_unreachable", "Could not reach the PetWorld server. Is Flask running?"));
   }
 
   let data = {};
@@ -54,11 +54,11 @@ async function empApi(path, { method = "GET", body = null, auth = true } = {}) {
 
   if (res.status === 401 && auth) {
     logout();
-    throw new Error("Please log in again.");
+    throw new Error(t("employee.login_again", "Please log in again."));
   }
 
   if (!res.ok) {
-    throw new Error(data.error || data.msg || "Something went wrong.");
+    throw new Error(data.error || data.msg || t("employee.err_generic", "Something went wrong."));
   }
 
   return data;
@@ -175,7 +175,7 @@ function updateEmpMarker(pos) {
       { icon: emojiIcon("🚗") }
     )
       .addTo(map)
-      .bindPopup("You");
+      .bindPopup('<span data-i18n="employee.you">You</span>');
   } else {
     empMarker.setLatLng([pos.lat, pos.lng]);
   }
@@ -201,7 +201,7 @@ function renderJobs() {
     $("jobs").innerHTML = `
       <div class="empty-state">
         <div class="emoji">📭</div>
-        <h3>No home-service bookings assigned yet</h3>
+        <h3 data-i18n="employee.empty_jobs">No home-service bookings assigned yet</h3>
       </div>`;
     return;
   }
@@ -231,34 +231,34 @@ function renderJobs() {
         </div>
 
         <div class="line">
-          <span>Customer:</span> ${b.customer_name} · ${b.customer_phone}
+          <span data-i18n="employee.customer">Customer:</span> ${b.customer_name} · ${b.customer_phone}
         </div>
 
         <div class="line">
-          <span>When:</span> ${b.date} at ${b.time} · ${b.duration_hours} hr
+          <span data-i18n="employee.when">When:</span> ${b.date} ${t("bookings.at_time", "at")} ${b.time} · ${b.duration_hours} ${t("employee.hr", "hr")}
         </div>
 
         <div class="line">
-          <span>Dogs:</span> ${b.number_of_dogs} ·
-          <span>Provider:</span> ${b.provider_gender}
+          <span data-i18n="employee.dogs">Dogs:</span> ${b.number_of_dogs} ·
+          <span data-i18n="employee.provider">Provider:</span> ${b.provider_gender}
         </div>
 
         <div class="line">
-          <span>Address:</span> ${b.address}
+          <span data-i18n="employee.address">Address:</span> ${b.address}
         </div>
 
         <div class="job-actions">
           <button
             class="btn btn-outline btn-sm"
             onclick="selectJob(${b.id})">
-            🗺️ View on Map
+            <span data-i18n="employee.view_on_map">🗺️ View on Map</span>
           </button>
 
           ${next ? `
             <button
               class="btn btn-primary btn-sm"
               onclick="doAction(${b.id}, '${next.action}')">
-              ${next.label}
+              <span data-i18n="${next.key}">${next.label}</span>
             </button>
           ` : ""}
         </div>
@@ -278,7 +278,7 @@ async function doAction(id, action) {
       method: "POST"
     });
 
-    showToast("Status updated", "success");
+    showToast(t("employee.status_updated", "Status updated"), "success");
     await loadBookings();
   } catch (err) {
     showToast(err.message, "error");
@@ -318,9 +318,9 @@ function startTracking(b) {
       lng: b.longitude + 0.02
     };
 
-    gpsStatus("Demo mode: simulating travel…");
+    gpsStatus(t("employee.demo_mode", "Demo mode: simulating travel…"));
   } else if (navigator.geolocation) {
-    gpsStatus("Getting GPS location…");
+    gpsStatus(t("employee.getting_gps", "Getting GPS location…"));
 
     track.watchId = navigator.geolocation.watchPosition(
       (p) => {
@@ -331,8 +331,8 @@ function startTracking(b) {
       },
       (err) => gpsStatus(
         err.code === 1
-          ? "GPS permission denied. Allow location access (or use Demo mode)."
-          : "Could not read GPS. Try Demo mode."
+          ? t("employee.gps_denied", "GPS permission denied. Allow location access (or use Demo mode).")
+          : t("employee.gps_read_failed", "Could not read GPS. Try Demo mode.")
       ),
       {
         enableHighAccuracy: true,
@@ -341,7 +341,7 @@ function startTracking(b) {
       }
     );
   } else {
-    gpsStatus("This browser has no GPS. Use Demo mode.");
+    gpsStatus(t("employee.no_gps", "This browser has no GPS. Use Demo mode."));
   }
 
   track.timer = setInterval(sendLocation, 5000);
@@ -369,7 +369,7 @@ function stopTracking() {
   };
 
   if (wasTracking) {
-    gpsStatus("Tracking stopped.");
+    gpsStatus(t("employee.tracking_stopped", "Tracking stopped."));
   }
 }
 
@@ -392,7 +392,7 @@ async function sendLocation() {
   const pos = track.sim ? stepSimulation() : track.latest;
 
   if (!pos) {
-    gpsStatus("Waiting for GPS signal…");
+    gpsStatus(t("employee.waiting_gps", "Waiting for GPS signal…"));
     return;
   }
 
@@ -408,7 +408,7 @@ async function sendLocation() {
     updateEmpMarker(pos);
 
     gpsStatus(
-      `📡 Sharing live location · last sent ${new Date().toLocaleTimeString()}`
+      `${t("employee.sharing_location", "📡 Sharing live location · last sent")} ${new Date().toLocaleTimeString()}`
     );
   } catch (err) {
     gpsStatus(err.message);

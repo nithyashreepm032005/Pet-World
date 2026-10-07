@@ -9,7 +9,7 @@ async function loadMyDogs() {
   try {
     myDogsCache = await api("/my-dogs");
     if (!myDogsCache.length) {
-      el.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3>No dogs added yet</h3><p>Add your dog to start tracking its vaccination schedule.</p></div>`;
+      el.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3 data-i18n="my_dogs.empty_title">No dogs added yet</h3><p data-i18n="my_dogs.empty_text">Add your dog to start tracking its vaccination schedule.</p></div>`;
       return;
     }
     el.innerHTML = myDogsCache.map(renderDogCard).join("");
@@ -20,8 +20,8 @@ async function loadMyDogs() {
 
 function renderDogCard(dog) {
   const overdueBadge = dog.vaccination_overdue
-    ? `<span class="status-badge status-Cancelled">Overdue</span>`
-    : (dog.next_vaccination_date ? `<span class="status-badge status-Confirmed">On Track</span>` : "");
+    ? `<span class="status-badge status-Cancelled" data-i18n="my_dogs.overdue">Overdue</span>`
+    : (dog.next_vaccination_date ? `<span class="status-badge status-Confirmed" data-i18n="my_dogs.on_track">On Track</span>` : "");
 
   return `
     <div class="list-card">
@@ -29,12 +29,12 @@ function renderDogCard(dog) {
         <h4>🐶 ${dog.name}${dog.breed ? " — " + dog.breed : ""}</h4>
         ${overdueBadge}
       </div>
-      <p class="card-meta">Vaccination Date: ${dog.vaccination_date || "Not set"}</p>
-      <p class="card-meta">Next Vaccination Due: ${dog.next_vaccination_date || "Not set"}</p>
-      ${dog.notes ? `<p class="card-meta">Notes: ${dog.notes}</p>` : ""}
+      <p class="card-meta"><span data-i18n="my_dogs.vacc_date_label">Vaccination Date:</span> ${dog.vaccination_date || t("common.not_set", "Not set")}</p>
+      <p class="card-meta"><span data-i18n="my_dogs.next_due_label">Next Vaccination Due:</span> ${dog.next_vaccination_date || t("common.not_set", "Not set")}</p>
+      ${dog.notes ? `<p class="card-meta"><span data-i18n="my_dogs.notes_label">Notes:</span> ${dog.notes}</p>` : ""}
       <div style="margin-top:10px; display:flex; gap:8px;">
-        <button class="btn btn-outline btn-sm" onclick="openEditModal(${dog.id})">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteDog(${dog.id})">Remove</button>
+        <button class="btn btn-outline btn-sm" onclick="openEditModal(${dog.id})" data-i18n="common.edit">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDog(${dog.id})" data-i18n="common.remove">Remove</button>
       </div>
     </div>
   `;
@@ -44,7 +44,7 @@ function openAddModal() {
   document.getElementById("dog-form").reset();
   document.getElementById("dog-id").value = "";
   document.getElementById("dog-interval").value = 365;
-  document.getElementById("dog-modal-title").textContent = "Add Dog";
+  setI18nText(document.getElementById("dog-modal-title"), "my_dogs.modal_add", "Add Dog");
   document.getElementById("dog-error").textContent = "";
   document.getElementById("dog-modal").style.display = "flex";
 }
@@ -57,7 +57,7 @@ function openEditModal(dogId) {
   document.getElementById("dog-vacc-date").value = dog.vaccination_date || "";
   document.getElementById("dog-interval").value = 365;
   document.getElementById("dog-notes").value = dog.notes || "";
-  document.getElementById("dog-modal-title").textContent = "Edit Dog";
+  setI18nText(document.getElementById("dog-modal-title"), "my_dogs.modal_edit", "Edit Dog");
   document.getElementById("dog-error").textContent = "";
   document.getElementById("dog-modal").style.display = "flex";
 }
@@ -87,7 +87,7 @@ document.getElementById("dog-form").addEventListener("submit", async (e) => {
       await api("/my-dogs", { method: "POST", body: payload });
     }
     closeDogModal();
-    showToast("Saved!", "success");
+    showToast(t("my_dogs.saved", "Saved!"), "success");
     loadMyDogs();
   } catch (err) {
     errorEl.textContent = err.message;
@@ -95,10 +95,10 @@ document.getElementById("dog-form").addEventListener("submit", async (e) => {
 });
 
 async function deleteDog(dogId) {
-  if (!confirm("Remove this dog's record?")) return;
+  if (!confirm(t("my_dogs.confirm_remove", "Remove this dog's record?"))) return;
   try {
     await api(`/my-dogs/${dogId}`, { method: "DELETE" });
-    showToast("Removed");
+    showToast(t("my_dogs.removed", "Removed"));
     loadMyDogs();
   } catch (err) {
     showToast(err.message, "error");

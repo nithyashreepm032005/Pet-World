@@ -31,7 +31,7 @@ async function loadDogs() {
     await Promise.all([loadFavourites(), loadAccount()]);
     allBreeds = await api("/dogs");
     if (!allBreeds.length) {
-      grid.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3>No breeds available right now</h3><p>Please check back soon!</p></div>`;
+      grid.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3 data-i18n="dogs.empty_title">No breeds available right now</h3><p data-i18n="dogs.empty_sub">Please check back soon!</p></div>`;
       return;
     }
     grid.innerHTML = allBreeds.map(renderBreedCard).join("");
@@ -54,11 +54,11 @@ function renderBreedCard(breed) {
         <button class="card-fav ${isFav ? 'active' : ''}" onclick="toggleFavourite(${breed.id}, this)">${isFav ? '❤' : '🤍'}</button>
       </div>
       <div class="card-body">
-        <span class="card-tag">${breed.availability ? 'Available' : 'Unavailable'}</span>
+        <span class="card-tag" data-i18n="${breed.availability ? 'common.available' : 'common.unavailable'}">${breed.availability ? 'Available' : 'Unavailable'}</span>
         <h3>${breed.breed_name}</h3>
       </div>
       <div class="card-actions">
-        <button class="btn btn-primary btn-block" onclick="openDetailsModal(${breed.id})">View Details</button>
+        <button class="btn btn-primary btn-block" onclick="openDetailsModal(${breed.id})" data-i18n="dogs.view_details">View Details</button>
       </div>
     </div>
   `;
@@ -73,13 +73,13 @@ async function toggleFavourite(breedId, btnEl) {
       favouriteIds.delete(breedId);
       btnEl.textContent = "🤍";
       btnEl.classList.remove("active");
-      showToast("Removed from favourites");
+      showToast(t("common.fav_removed", "Removed from favourites"));
     } else {
       await api("/favourites", { method: "POST", body: { item_type: "dog", item_id: breedId } });
       favouriteIds.add(breedId);
       btnEl.textContent = "❤";
       btnEl.classList.add("active");
-      showToast("Added to favourites", "success");
+      showToast(t("common.fav_added", "Added to favourites"), "success");
     }
   } catch (err) {
     showToast(err.message, "error");
@@ -152,7 +152,7 @@ async function addToCart(breedId) {
         details: { breed_name: breed.breed_name, age_months: variant.age_months, image: breed.image },
       },
     });
-    showToast(`${breed.breed_name} added to cart!`, "success");
+    showToast(`${breed.breed_name} ${t("common.added_to_cart", "added to cart!")}`, "success");
     refreshCartBadge();
     closeDetailsModal();
   } catch (err) {
@@ -196,11 +196,11 @@ document.getElementById("buy-form").addEventListener("submit", async (e) => {
 
   const pincode = document.getElementById("bf-pincode").value.trim();
   if (!/^5[6-9]\d{4}$/.test(pincode)) {
-    errorEl.textContent = "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).";
+    errorEl.textContent = t("common.err_pincode", "Please enter a valid 6-digit Karnataka PIN code (starts with 56-59).");
     return;
   }
   if (!document.getElementById("bf-city").value) {
-    errorEl.textContent = "Please select a city.";
+    errorEl.textContent = t("common.err_city", "Please select a city.");
     return;
   }
 
@@ -221,7 +221,7 @@ document.getElementById("buy-form").addEventListener("submit", async (e) => {
 
   try {
     await api("/checkout/buy-now", { method: "POST", body: { ...pendingBuy, address, ...payment } });
-    showToast("Order placed successfully!", "success");
+    showToast(t("common.order_placed", "Order placed successfully!"), "success");
     closeBuyModal();
     setTimeout(() => (window.location.href = "orders.html"), 1200);
   } catch (err) {

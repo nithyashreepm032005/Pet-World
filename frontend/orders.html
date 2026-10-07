@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetWorld — My Orders</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/assistant.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -14,8 +15,8 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <a href="account.html" class="back-link">← Back to Account</a>
-      <h1>My Orders 📦</h1>
+      <a href="account.html" class="back-link" data-i18n="common.back_account">← Back to Account</a>
+      <h1 data-i18n="orders.title">My Orders 📦</h1>
     </div>
   </div>
   <div id="orders-list">
@@ -27,19 +28,20 @@
 <div class="modal-overlay" id="return-modal" style="display:none;">
   <div class="modal-box">
     <span class="modal-close" onclick="closeReturnModal()">&times;</span>
-    <h2>Request a Return</h2>
-    <p class="helper-text" style="margin-bottom:14px;">Tell us briefly why you'd like to return this order.</p>
+    <h2 data-i18n="orders.return_title">Request a Return</h2>
+    <p class="helper-text" style="margin-bottom:14px;" data-i18n="orders.return_helper">Tell us briefly why you'd like to return this order.</p>
     <div class="form-group">
-      <textarea id="return-reason" rows="3" placeholder="e.g. Received the wrong item, product was damaged, etc."></textarea>
+      <textarea id="return-reason" rows="3" data-i18n-ph="orders.return_ph" placeholder="e.g. Received the wrong item, product was damaged, etc."></textarea>
     </div>
     <p class="error-text" id="return-error"></p>
-    <button class="btn btn-primary btn-block" onclick="submitReturn()">Submit Return Request</button>
+    <button class="btn btn-primary btn-block" onclick="submitReturn()" data-i18n="orders.return_submit">Submit Return Request</button>
   </div>
 </div>
 
-<footer>🐾 PetWorld — Track every order, right here.</footer>
+<footer data-i18n="orders.footer">🐾 PetWorld — Track every order, right here.</footer>
 
-<script src="js/api.js?v=3"></script>
+<script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
 <script src="js/orders.js?v=2"></script>
+<script src="js/assistant.js"></script>
 </body>
 </html>

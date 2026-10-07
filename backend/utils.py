@@ -6,13 +6,6 @@ from email.mime.text import MIMEText
 from flask import current_app
 
 
-def generate_user_id():
-    """Generate a unique-looking User ID, e.g. PW-7K2H9Q. Never based on name."""
-    chars = string.ascii_uppercase + string.digits
-    suffix = "".join(random.choices(chars, k=6))
-    return f"PW-{suffix}"
-
-
 def generate_order_id():
     chars = string.digits
     return "ORD" + "".join(random.choices(chars, k=8))
@@ -136,7 +129,7 @@ def send_email(to_email, subject, body):
     """
     Sends an email if MAIL_USERNAME/MAIL_PASSWORD are configured.
     Otherwise, just logs the email to the console - useful for local dev/testing
-    so you can see the generated User ID / reset token without real SMTP setup.
+    so you can see things like the password reset token without real SMTP setup.
     """
     mail_user = current_app.config.get("MAIL_USERNAME")
     mail_pass = current_app.config.get("MAIL_PASSWORD")
