@@ -1,4 +1,4 @@
-requireAuth();
+requireCustomer();
 renderTopbar("bookings");
 refreshCartBadge();
 

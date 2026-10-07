@@ -20,6 +20,12 @@
     <a href="bookings.html" class="btn btn-outline btn-sm">My Bookings</a>
   </div>
 
+  <div class="summary-card" style="margin-bottom:22px;">
+    <h3 style="margin-bottom:6px;">🏪 Visit Our Store</h3>
+    <p class="card-meta" id="store-address-text"></p>
+    <a id="store-maps-link" href="#" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="margin-top:10px;">📍 Open in Google Maps</a>
+  </div>
+
   <div id="services-container">
     <div class="spinner"></div>
   </div>
@@ -27,7 +33,11 @@
 
 <footer>🐾 PetWorld — Grooming & training, at our store or at your home.</footer>
 
-<script src="js/api.js?v=2"></script>
-<script src="js/services.js?v=4"></script>
+<script src="js/api.js?v=5"></script>
+<script src="js/services.js?v=5"></script>
+<script>
+  document.getElementById("store-address-text").textContent = STORE_ADDRESS;
+  document.getElementById("store-maps-link").href = STORE_MAPS_LINK;
+</script>
 </body>
 </html>

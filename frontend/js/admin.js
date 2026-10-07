@@ -286,7 +286,6 @@ async function renderServicesTab() {
   cachedServices = await api("/services");
   const el = document.getElementById("tab-content");
   el.innerHTML = `
-    <p class="helper-text" style="margin-bottom:12px;">Only "Grooming & Spa" and "Training & Behavioral" categories are permitted per the spec. Service photos are set in the code (images/services/) rather than here.</p>
     <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
       <button class="btn btn-primary" onclick="openServiceModal()">+ Add Service Category</button>
     </div>
@@ -322,6 +321,7 @@ function openServiceModal(serviceId = null) {
     const s = cachedServices.find(x => x.id === serviceId);
     document.getElementById("s-name").value = s.service_name;
     document.getElementById("s-desc").value = s.description || "";
+    document.getElementById("s-image").value = s.image || "";
   }
   document.getElementById("service-modal").style.display = "flex";
 }
@@ -333,6 +333,7 @@ document.getElementById("service-form").addEventListener("submit", async (e) => 
   const payload = {
     service_name: document.getElementById("s-name").value.trim(),
     description: document.getElementById("s-desc").value.trim(),
+    image: document.getElementById("s-image").value.trim(),
   };
   try {
     if (serviceId) {

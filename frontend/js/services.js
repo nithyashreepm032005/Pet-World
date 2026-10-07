@@ -1,4 +1,4 @@
-requireAuth();
+requireCustomer();
 renderTopbar("services");
 refreshCartBadge();
 
@@ -30,15 +30,21 @@ async function loadServices() {
 function renderServiceCard(service) {
   const isFav = favouriteIds.has(service.id);
   const isTraining = service.service_name.includes("Training");
+  const emoji = isTraining ? "🎾" : "🛁";
   const color = isTraining ? "#7c5cff" : "#ff6b9d";
-  const img1 = isTraining ? "images/services/training1.jpg" : "images/services/grooming1.jpg";
-  const img2 = isTraining ? "images/services/training2.jpg" : "images/services/grooming2.jpg";
+
+  // Uses the ACTUAL image the admin set for this service (service.image,
+  // coming straight from the database/API) instead of a hardcoded path.
+  // If there's no image yet, or the file fails to load, it falls back to
+  // a colored tile with an emoji - so a missing image never breaks the page.
+  const imgHtml = service.image
+    ? `<img src="${service.image}" alt="${service.service_name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.outerHTML='${emoji}';">`
+    : emoji;
 
   return `
     <div class="card">
-      <div class="card-img" style="background:${color}; position:relative; display:flex; padding:0;">
-        <img src="${img1}" alt="${service.service_name}" style="width:50%; height:100%; object-fit:cover;" onerror="this.style.display='none';">
-        <img src="${img2}" alt="${service.service_name}" style="width:50%; height:100%; object-fit:cover;" onerror="this.style.display='none';">
+      <div class="card-img" style="background:${color}; position:relative; display:flex; align-items:center; justify-content:center; font-size:56px;">
+        ${imgHtml}
         <button class="card-fav ${isFav ? 'active' : ''}" onclick="toggleFavourite(${service.id}, this)">${isFav ? '❤' : '🤍'}</button>
       </div>
       <div class="card-body">

@@ -1,4 +1,4 @@
-requireAuth();
+requireCustomer();
 renderTopbar("cart");
 
 const TYPE_EMOJI = { dog: "🐕", food: "🍖", service: "🛁" };
