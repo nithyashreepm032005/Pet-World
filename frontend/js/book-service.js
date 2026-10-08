@@ -68,6 +68,9 @@ async function init() {
   ["time", "duration", "dogs", "provider"].forEach(id => $(id).addEventListener("change", onOptionChange));
   $("address").addEventListener("input", updateConfirmState);
 
+  $("confirm-btn").removeAttribute("disabled");
+  updateConfirmState();
+
   onOptionChange();
 }
 
@@ -87,6 +90,7 @@ function setMode(newMode) {
   if (mode === "home") {
     if (!map) initMap();
     setTimeout(() => map.invalidateSize(), 150);
+    setTimeout(maybeAutoDetectLocation, 600);
   }
   onOptionChange();
 }
@@ -172,6 +176,10 @@ async function setLocation(lat, lng, moveMap = true) {
 }
 
 function useMyLocation() {
+  detectCurrentLocation();
+}
+
+function detectCurrentLocation() {
   if (!navigator.geolocation) {
     showToast(t("book_service.gps_unsupported", "Your browser does not support GPS location."), "error");
     return;
@@ -179,6 +187,7 @@ function useMyLocation() {
   const btn = $("btn-gps");
   btn.disabled = true;
   setI18nText(btn, "book_service.getting_location", "Getting location…");
+  setLocStatus("wait", "book_service.loc_detecting", "Detecting your current location…");
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       btn.disabled = false;
@@ -196,6 +205,23 @@ function useMyLocation() {
     },
     { enableHighAccuracy: true, timeout: 15000 }
   );
+}
+
+let locationAutoAsked = false;
+
+async function maybeAutoDetectLocation() {
+  if (locationAutoAsked || mode !== "home" || !navigator.geolocation) return;
+  locationAutoAsked = true;
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      const permState = await navigator.permissions.query({ name: "geolocation" });
+      if (permState.state === "denied") {
+        setLocStatus("err", "book_service.gps_denied", "Location permission was denied. Allow location access, or pick a point on the map.");
+        return;
+      }
+    }
+  } catch (e) { /* permissions API unavailable -> just try */ }
+  detectCurrentLocation();
 }
 
 /* ------------------------------------------------------ price */
@@ -229,19 +255,42 @@ async function refreshQuote() {
 }
 
 /* --------------------------------------------------- confirm */
-function updateConfirmState() {
-  let ok = !!($("date").value && $("time").value);
+function bookingValidationMessages() {
+  const msgs = [];
+  if (!$("date").value) msgs.push(t("book_service.err_date", "Please select a date."));
+  if (!$("time").value) msgs.push(t("book_service.err_time", "Please select a time."));
   if (mode === "home") {
-    ok = ok && selected.inBengaluru && !selected.checking && $("address").value.trim().length >= 5;
+    if (!selected.lat || !selected.lng) {
+      msgs.push(t("book_service.err_location", "Please select your location for home service."));
+    } else if (selected.checking) {
+      msgs.push(t("book_service.loc_detecting", "Detecting your current location…"));
+    } else if (!selected.inBengaluru) {
+      msgs.push(t("book_service.loc_outside", "Home service is currently available only within Bengaluru."));
+    } else if ($("address").value.trim().length < 5) {
+      msgs.push(t("book_service.err_address", "Please provide your address."));
+    }
   }
-  $("confirm-btn").disabled = !ok;
+  return msgs;
+}
+
+function updateConfirmState() {
+  const msgs = bookingValidationMessages();
+  $("book-error").textContent = msgs.length
+    ? t("book_service.err_required_prefix", "Almost there:") + " " + msgs.join(" ")
+    : "";
 }
 
 async function confirmBooking() {
   const errorEl = $("book-error");
   errorEl.textContent = "";
   const btn = $("confirm-btn");
-  btn.disabled = true;
+
+  const msgs = bookingValidationMessages();
+  if (msgs.length) {
+    errorEl.textContent = msgs.join(" ");
+    return;
+  }
+
   setI18nText(btn, "book_service.booking_now", "Booking…");
 
   const body = {
@@ -260,22 +309,49 @@ async function confirmBooking() {
   }
 
   const payment = getPaymentPayload("sb-payment");
-  if (!payment) { btn.disabled = false; setI18nText(btn, "book_service.confirm_booking", "Confirm Booking"); return; }
+  if (!payment) { setI18nText(btn, "book_service.confirm_booking", "Confirm Booking"); return; }
   Object.assign(body, payment);
 
   try {
     const data = await api("/service-bookings", { method: "POST", body });
     showToast(t("book_service.booking_confirmed", "Booking confirmed!"), "success");
-    setTimeout(() => {
-      window.location.href = mode === "home"
-        ? `track-service.html?id=${data.booking.id}`
-        : "bookings.html";
-    }, 900);
+    showSuccessPanel(data.booking);
   } catch (err) {
     errorEl.textContent = err.message;
     setI18nText(btn, "book_service.confirm_booking", "Confirm Booking");
-    updateConfirmState();
   }
+}
+
+function showSuccessPanel(booking) {
+  const panel = $("book-success");
+  const dogs = parseInt(booking.number_of_dogs, 10) || 1;
+  const petLabel = dogs === 1 ? t("common.dog", "dog") : t("common.dogs", "dogs");
+  $("success-service").textContent = booking.service_name;
+  $("success-pet").textContent = `${dogs} ${petLabel}`;
+  $("success-date").textContent = booking.date;
+  $("success-time").textContent = booking.time;
+  $("success-status").textContent = booking.status;
+  $("success-id").textContent = booking.booking_id;
+  $("success-price").textContent = formatPrice(booking.price);
+  setI18nText($("success-message"), "book_success.message", "Your service has been booked successfully.");
+
+  const isHome = booking.service_mode === "home";
+  $("success-track").style.display = isHome ? "inline-block" : "none";
+
+  $("success-view-bookings").onclick = () => { window.location.href = "bookings.html"; };
+  $("success-track").onclick = () => { window.location.href = `track-service.html?id=${booking.id}`; };
+  let redirected = false;
+  const go = () => {
+    if (redirected) return;
+    redirected = true;
+    window.location.href = isHome ? `track-service.html?id=${booking.id}` : "bookings.html";
+  };
+  $("success-close").onclick = go;
+  setTimeout(go, 5000);
+
+  panel.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  panel.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 init();

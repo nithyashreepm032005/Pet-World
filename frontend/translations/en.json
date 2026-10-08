@@ -274,7 +274,23 @@
     "extra_dogs": "Additional dogs (70% each)",
     "home_visit_fee": "Home visit fee",
     "footer": "🐾 PetWorld — Grooming & training, at our store or at your home.",
-    "book_prefix": "Book:"
+    "book_prefix": "Book:",
+    "err_date": "Please select a date.",
+    "err_time": "Please select a time.",
+    "err_location": "Please select your location for home service.",
+    "err_address": "Please provide your address.",
+    "err_required_prefix": "Almost there:",
+    "loc_detecting": "Detecting your current location…"
+  },
+  "book_success": {
+    "message": "Your service has been booked successfully.",
+    "pet": "Pet(s)",
+    "status": "Booking status",
+    "booking_id": "Booking ID",
+    "track": "📍 Track Employee",
+    "view_bookings": "🗓️ View My Bookings",
+    "close": "Close",
+    "redirect_note": "You will be redirected automatically…"
   },
   "track": {
     "title": "Track Your Service 📍",

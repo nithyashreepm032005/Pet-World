@@ -26,6 +26,13 @@
   .loc-status.err { color:var(--danger); }
   .loc-status.wait { color:var(--text-muted); }
   .note { font-size:12px; color:var(--text-muted); margin-top:8px; }
+  .success-overlay { position:fixed; inset:0; background:rgba(20,24,33,.55); display:none; align-items:center; justify-content:center; z-index:2000; padding:20px; }
+  .success-card { width:min(480px,100%); max-height:90vh; overflow:auto; text-align:center; }
+  .success-check { font-size:44px; margin-bottom:6px; }
+  .success-rows { text-align:left; margin:14px 0; }
+  .detail-row { display:flex; justify-content:space-between; gap:12px; padding:9px 2px; border-bottom:1px dashed var(--border, #e2e8f0); font-size:14px; }
+  .detail-row span:first-child { color:var(--text-muted); }
+  .success-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
   @media (max-width:600px){ .mode-toggle{ grid-template-columns:1fr; } }
 </style>
 </head>
@@ -121,11 +128,33 @@
   </div>
 </main>
 
+<div class="success-overlay" id="book-success">
+  <div class="panel success-card">
+    <div class="success-check">✅</div>
+    <h2 id="success-message" style="margin:0 0 10px;">Your service has been booked successfully.</h2>
+    <div class="success-rows">
+      <div class="detail-row"><span data-i18n="admin.th_service">Service</span><span id="success-service"></span></div>
+      <div class="detail-row"><span data-i18n="book_success.pet">Pet(s)</span><span id="success-pet"></span></div>
+      <div class="detail-row"><span data-i18n="book_service.date">Date</span><span id="success-date"></span></div>
+      <div class="detail-row"><span data-i18n="book_service.time">Time</span><span id="success-time"></span></div>
+      <div class="detail-row"><span data-i18n="book_success.status">Booking status</span><span id="success-status"></span></div>
+      <div class="detail-row"><span data-i18n="book_success.booking_id">Booking ID</span><span id="success-id"></span></div>
+      <div class="detail-row"><span data-i18n="common.price">Price</span><span id="success-price"></span></div>
+    </div>
+    <div class="success-actions">
+      <button type="button" class="btn btn-primary btn-sm" id="success-track" style="display:none;" data-i18n="book_success.track">📍 Track Employee</button>
+      <button type="button" class="btn btn-primary btn-sm" id="success-view-bookings" data-i18n="book_success.view_bookings">🗓️ View My Bookings</button>
+      <button type="button" class="btn btn-outline btn-sm" id="success-close" data-i18n="book_success.close">Close</button>
+    </div>
+    <p class="note" data-i18n="book_success.redirect_note">You will be redirected automatically…</p>
+  </div>
+</div>
+
 <footer data-i18n="book_service.footer">🐾 PetWorld — Grooming & training, at our store or at your home.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
-<script src="js/book-service.js?v=2"></script>
+<script src="js/book-service.js?v=3"></script>
 <script>document.getElementById("sb-payment").innerHTML = paymentSectionHTML("sb-payment");</script>
 <script src="js/assistant.js"></script>
 </body>

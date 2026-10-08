@@ -20,7 +20,7 @@ import random
 from datetime import datetime
 from functools import wraps
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token, verify_jwt_in_request, get_jwt, get_jwt_identity,
 )
@@ -271,7 +271,12 @@ def create_service_booking(user):
         booking_status=STATUS_CONFIRMED,
     )
     db.session.add(booking)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Failed to save service booking")
+        return jsonify({"error": "Unable to create booking. Please try again."}), 500
 
     return jsonify({"message": "Booking confirmed!", "booking": booking_to_dict(booking)}), 201
 
