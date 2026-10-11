@@ -27,6 +27,7 @@ from flask_jwt_extended import (
 
 from extensions import db, bcrypt
 from models import User, Service
+from customer_dog_models import CustomerDog
 from service_models import Employee, ServiceBooking, EmployeeLocation
 from service_logic import (
     ALLOWED_DURATIONS, MAX_DOGS, FIRST_SLOT, LAST_SLOT, PROVIDER_GENDERS,
@@ -119,6 +120,8 @@ def booking_to_dict(b, include_customer=False):
         "booking_id": b.booking_id,
         "service_id": b.service_id,
         "service_name": b.service_name,
+        "pet_id": b.pet_id,
+        "pet_name": b.pet_name,
         "service_mode": b.service_mode,
         "date": b.booking_date.isoformat(),
         "time": b.booking_time.strftime("%H:%M"),
@@ -216,6 +219,18 @@ def create_service_booking(user):
     if not 1 <= dogs <= MAX_DOGS:
         return jsonify({"error": f"Number of dogs must be between 1 and {MAX_DOGS}."}), 400
 
+    # ---- optional pet (from the customer's own "My Dogs") ----
+    pet = None
+    if data.get("pet_id") not in (None, "", 0, "0"):
+        try:
+            pet_pk = int(data["pet_id"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid pet selection."}), 400
+        # Scoped to this customer so one customer can't book another's pet.
+        pet = CustomerDog.query.filter_by(id=pet_pk, user_id=user.id).first()
+        if not pet:
+            return jsonify({"error": "Selected pet was not found."}), 400
+
     # ---- mode specific ----
     address = lat = lng = provider_gender = employee = None
 
@@ -255,6 +270,8 @@ def create_service_booking(user):
         user_id=user.id,
         service_id=service.id,
         service_name=service.service_name,
+        pet_id=pet.id if pet else None,
+        pet_name=pet.name if pet else None,
         service_mode=mode,
         booking_date=booking_date,
         booking_time=booking_time,

@@ -27,6 +27,11 @@ class ServiceBooking(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     service_id = db.Column(db.Integer, db.ForeignKey("services.id"), nullable=False)
     service_name = db.Column(db.String(100), nullable=False)
+    # Optional link to one of the customer's own saved pets ("My Dogs").
+    # Stored as a plain id + snapshot name so an admin can see who the
+    # booking is for even if the pet record is later edited/removed.
+    pet_id = db.Column(db.Integer)
+    pet_name = db.Column(db.String(100))
     service_mode = db.Column(db.String(10), nullable=False)    # store / home
     booking_date = db.Column(db.Date, nullable=False)
     booking_time = db.Column(db.Time, nullable=False)

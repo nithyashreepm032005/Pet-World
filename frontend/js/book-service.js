@@ -13,6 +13,7 @@ let marker = null;
 let selected = { lat: null, lng: null, inBengaluru: false, checking: false };
 let quoteTimer = null;
 let lastQuote = null;
+let myPets = [];
 
 const $ = (id) => document.getElementById(id);
 
@@ -63,6 +64,7 @@ async function init() {
   $("date").min = localToday();
   $("date").value = localToday();
   buildTimeSlots();
+  loadPets();
 
   $("date").addEventListener("change", () => { buildTimeSlots(); updateConfirmState(); });
   ["time", "duration", "dogs", "provider"].forEach(id => $(id).addEventListener("change", onOptionChange));
@@ -72,6 +74,33 @@ async function init() {
   updateConfirmState();
 
   onOptionChange();
+}
+
+/* ------------------------------------------------------- pets */
+async function loadPets() {
+  const sel = $("pet");
+  try {
+    myPets = await api("/my-dogs");
+  } catch (e) {
+    myPets = [];
+  }
+  if (!myPets.length) {
+    // No saved pets yet - show the "add a pet" link but keep booking possible.
+    $("pet-hint").style.display = "block";
+    return;
+  }
+  myPets.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d.id;
+    opt.textContent = d.breed ? `${d.name} — ${d.breed}` : d.name;
+    sel.appendChild(opt);
+  });
+}
+
+function selectedPet() {
+  const id = $("pet").value;
+  if (!id) return null;
+  return myPets.find((d) => String(d.id) === String(id)) || null;
 }
 
 function onOptionChange() {
@@ -307,6 +336,10 @@ async function confirmBooking() {
     body.address = $("address").value.trim();
     body.provider_gender = $("provider").value;
   }
+  const pet = selectedPet();
+  if (pet) {
+    body.pet_id = pet.id;
+  }
 
   const payment = getPaymentPayload("sb-payment");
   if (!payment) { setI18nText(btn, "book_service.confirm_booking", "Confirm Booking"); return; }
@@ -327,7 +360,9 @@ function showSuccessPanel(booking) {
   const dogs = parseInt(booking.number_of_dogs, 10) || 1;
   const petLabel = dogs === 1 ? t("common.dog", "dog") : t("common.dogs", "dogs");
   $("success-service").textContent = booking.service_name;
-  $("success-pet").textContent = `${dogs} ${petLabel}`;
+  $("success-pet").textContent = booking.pet_name
+    ? `${booking.pet_name} (${dogs} ${petLabel})`
+    : `${dogs} ${petLabel}`;
   $("success-date").textContent = booking.date;
   $("success-time").textContent = booking.time;
   $("success-status").textContent = booking.status;

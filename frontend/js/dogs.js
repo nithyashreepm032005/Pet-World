@@ -54,7 +54,7 @@ function renderBreedCard(breed) {
         <button class="card-fav ${isFav ? 'active' : ''}" onclick="toggleFavourite(${breed.id}, this)">${isFav ? '❤' : '🤍'}</button>
       </div>
       <div class="card-body">
-        <span class="card-tag" data-i18n="${breed.availability ? 'common.available' : 'common.unavailable'}">${breed.availability ? 'Available' : 'Unavailable'}</span>
+        <span class="card-tag ${breed.availability ? 'available' : 'unavailable'}" data-i18n="${breed.availability ? 'common.available' : 'common.unavailable'}">${breed.availability ? 'Available' : 'Unavailable'}</span>
         <h3>${breed.breed_name}</h3>
       </div>
       <div class="card-actions">

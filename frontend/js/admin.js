@@ -537,7 +537,15 @@ async function updateReturnStatus(returnId, status) {
 }
 
 // ==================== BOOKINGS ====================
+// Legacy checkout bookings and the newer customer service bookings use
+// different status vocabularies, so the dropdown is built per booking source.
 const BOOKING_STATUSES = ["Pending", "Confirmed", "Completed", "Cancelled"];
+const SERVICE_BOOKING_STATUSES = ["Booking Confirmed", "Employee Assigned", "On the Way", "Arrived", "Service Started", "Service Completed", "Cancelled"];
+
+function bookingStatusOptions(b) {
+  const list = b.source === "service" ? SERVICE_BOOKING_STATUSES : BOOKING_STATUSES;
+  return list.map(s => `<option value="${s}" ${s === b.status ? "selected" : ""}>${s}</option>`).join("");
+}
 
 async function renderBookingsTab() {
   const bookings = await api("/admin/bookings");
@@ -548,19 +556,20 @@ async function renderBookingsTab() {
   }
   el.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th data-i18n="admin.th_booking_id">Booking ID</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_package">Package</th><th data-i18n="admin.th_date">Date</th><th data-i18n="admin.th_time">Time</th><th data-i18n="admin.th_price">Price</th><th data-i18n="admin.th_status">Status</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_booking_id">Booking ID</th><th data-i18n="admin.th_customer">Customer</th><th data-i18n="admin.th_pet">Pet</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_date">Date</th><th data-i18n="admin.th_time">Time</th><th data-i18n="admin.th_price">Price</th><th data-i18n="admin.th_status">Status</th></tr></thead>
       <tbody>
         ${bookings.map(b => `
           <tr>
             <td>${b.booking_id}</td>
-            <td>${b.service}</td>
-            <td>${b.package}</td>
-            <td>${b.booking_date}</td>
-            <td>${b.booking_time}</td>
+            <td>${b.customer_name || "-"}<br><span class="card-meta">${b.customer_user_id || ""}${b.customer_phone ? " · " + b.customer_phone : ""}</span></td>
+            <td>${b.pet_name || "—"}</td>
+            <td>${b.service_name || "-"}${b.package_name ? " (" + b.package_name + ")" : ""}${b.service_mode === "home" ? ' <span class="card-meta">🏠</span>' : ""}</td>
+            <td>${b.booking_date || "-"}</td>
+            <td>${b.booking_time || "-"}</td>
             <td>${formatPrice(b.price)}</td>
             <td>
-              <select class="status-select" onchange="updateBookingStatus(${b.id}, this.value)">
-                ${BOOKING_STATUSES.map(s => `<option value="${s}" ${s === b.status ? "selected" : ""}>${s}</option>`).join("")}
+              <select class="status-select" onchange="updateBookingStatus('${b.source}', ${b.id}, this.value)">
+                ${bookingStatusOptions(b)}
               </select>
             </td>
           </tr>
@@ -570,9 +579,9 @@ async function renderBookingsTab() {
   `;
 }
 
-async function updateBookingStatus(bookingId, status) {
+async function updateBookingStatus(source, bookingId, status) {
   try {
-    await api(`/admin/bookings/${bookingId}/status`, { method: "PUT", body: { status } });
+    await api(`/admin/bookings/${bookingId}/status`, { method: "PUT", body: { status, source } });
     showToast(t("admin.booking_status_updated", "Booking status updated!"), "success");
   } catch (err) { showToast(err.message, "error"); }
 }

@@ -16,11 +16,6 @@ def generate_booking_id():
     return "BKG" + "".join(random.choices(chars, k=8))
 
 
-def generate_reset_token():
-    chars = string.ascii_letters + string.digits
-    return "".join(random.choices(chars, k=32))
-
-
 def is_valid_password(password):
     """Exactly 8 characters, as required by the master prompt."""
     return isinstance(password, str) and len(password) == 8

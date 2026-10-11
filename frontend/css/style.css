@@ -342,6 +342,8 @@ img { max-width: 100%; display: block; }
   color: var(--primary-dark);
   width: fit-content;
 }
+.card-tag.available { background: transparent; border-radius: 0; color: #15803d; }
+.card-tag.unavailable { background: transparent; border-radius: 0; color: #dc2626; }
 .card-meta { font-size: 13px; color: var(--text-muted); }
 .card-price { font-size: 20px; font-weight: 800; color: var(--primary-dark); margin-top: auto; }
 .card-actions { display: flex; gap: 8px; padding: 0 18px 18px; }

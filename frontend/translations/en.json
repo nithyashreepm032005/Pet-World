@@ -280,7 +280,10 @@
     "err_location": "Please select your location for home service.",
     "err_address": "Please provide your address.",
     "err_required_prefix": "Almost there:",
-    "loc_detecting": "Detecting your current location…"
+    "loc_detecting": "Detecting your current location…",
+    "pet_label": "Pet (optional)",
+    "pet_none": "Any / not specified",
+    "add_pet_link": "Add a pet in My Dogs"
   },
   "book_success": {
     "message": "Your service has been booked successfully.",
@@ -405,6 +408,7 @@
     "th_requested_on": "Requested On",
     "th_reason": "Reason",
     "th_booking_id": "Booking ID",
+    "th_pet": "Pet",
     "th_date": "Date",
     "th_time": "Time",
     "th_price": "Price",

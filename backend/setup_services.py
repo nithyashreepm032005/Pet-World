@@ -11,6 +11,7 @@ It is safe to run more than once.
 """
 import models            # noqa: F401  - existing tables (users, services ...)
 import service_models    # noqa: F401  - new tables
+from sqlalchemy import inspect, text
 from app import create_app
 from extensions import db, bcrypt
 from service_models import Employee
@@ -26,6 +27,18 @@ app = create_app()
 with app.app_context():
     db.create_all()   # only creates tables that do not exist yet
     print("Tables ready: employees, service_bookings, employee_locations")
+
+    # `db.create_all()` never alters a table that already exists, so add the
+    # optional pet columns to an older service_bookings table if they are
+    # missing. Safe to run repeatedly.
+    existing_cols = {c["name"] for c in inspect(db.engine).get_columns("service_bookings")}
+    if "pet_id" not in existing_cols:
+        db.session.execute(text("ALTER TABLE service_bookings ADD COLUMN pet_id INT NULL"))
+        print("Added service_bookings.pet_id")
+    if "pet_name" not in existing_cols:
+        db.session.execute(text("ALTER TABLE service_bookings ADD COLUMN pet_name VARCHAR(100) NULL"))
+        print("Added service_bookings.pet_name")
+    db.session.commit()
 
     for name, phone, email, gender, password in DEMO_EMPLOYEES:
         if Employee.query.filter_by(email=email).first():

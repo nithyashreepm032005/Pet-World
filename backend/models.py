@@ -289,6 +289,7 @@ class Booking(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     status = db.Column(db.String(20), default="Pending")
 
+    user = db.relationship("User")
     service = db.relationship("Service")
     package = db.relationship("ServicePackage")
 
@@ -303,12 +304,3 @@ class Booking(db.Model):
             "price": float(self.price),
             "status": self.status,
         }
-
-
-class PasswordResetToken(db.Model):
-    __tablename__ = "password_reset_tokens"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    token = db.Column(db.String(100), unique=True, nullable=False)
-    expiry = db.Column(db.DateTime, nullable=False)
-    used = db.Column(db.Boolean, default=False)

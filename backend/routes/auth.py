@@ -1,10 +1,9 @@
 import re
-from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token
 from extensions import db, bcrypt
-from models import User, PasswordResetToken
-from utils import generate_reset_token, is_valid_password, send_email, EMAIL_PATTERN
+from models import User
+from utils import is_valid_password, EMAIL_PATTERN
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -112,44 +111,33 @@ def logout():
 
 @auth_bp.route("/forgot-password", methods=["POST"])
 def forgot_password():
-    data = request.get_json(force=True)
-    email = (data.get("email") or "").strip().lower()
-
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        # Do not reveal whether the email exists, for security.
-        return jsonify(
-            {"message": "If that email is registered, a reset link has been sent."}
-        ), 200
-
-    token = generate_reset_token()
-    reset = PasswordResetToken(
-        user_id=user.id,
-        token=token,
-        expiry=datetime.utcnow() + timedelta(minutes=30),
-        used=False,
-    )
-    db.session.add(reset)
-    db.session.commit()
-
-    send_email(
-        user.email,
-        "PetWorld Password Reset",
-        f"Hello {user.full_name},\n\nUse this token to reset your password: {token}\n"
-        f"This token expires in 30 minutes.",
-    )
-
+    # The old email + reset-token flow has been removed. The customer now
+    # resets the password directly from the Reset Password page using their
+    # User ID, so there is nothing to send by email.
     return jsonify(
-        {"message": "If that email is registered, a reset link has been sent."}
-    ), 200
+        {"error": "Please use the Reset Password page with your User ID."}
+    ), 410
 
 
 @auth_bp.route("/reset-password", methods=["POST"])
 def reset_password():
     data = request.get_json(force=True)
-    token = (data.get("token") or "").strip()
+    user_id = (data.get("user_id") or "").strip().upper()
     new_password = data.get("new_password") or ""
     confirm_password = data.get("confirm_password") or ""
+
+    if not user_id:
+        return jsonify({"error": "Please enter your User ID."}), 400
+
+    user = User.query.filter_by(user_id=user_id).first()
+    if not user:
+        return jsonify({"error": "User ID not found. Please check your User ID."}), 404
+
+    if not new_password:
+        return jsonify({"error": "Please enter a new password."}), 400
+
+    if not confirm_password:
+        return jsonify({"error": "Please confirm your new password."}), 400
 
     if new_password != confirm_password:
         return jsonify({"error": "Passwords do not match."}), 400
@@ -159,13 +147,14 @@ def reset_password():
             {"error": f"Password must be exactly {current_app.config['PASSWORD_LENGTH']} characters."}
         ), 400
 
-    reset = PasswordResetToken.query.filter_by(token=token, used=False).first()
-    if not reset or reset.expiry < datetime.utcnow():
-        return jsonify({"error": "Invalid or expired reset token."}), 400
+    try:
+        # Same bcrypt hashing used at registration - never store plain text.
+        user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "Could not reset the password. Please try again."}), 500
 
-    user = User.query.get(reset.user_id)
-    user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
-    reset.used = True
-    db.session.commit()
-
-    return jsonify({"message": "Password reset successful. Please log in."}), 200
+    return jsonify(
+        {"message": "Password reset successfully. Please login with your new password."}
+    ), 200

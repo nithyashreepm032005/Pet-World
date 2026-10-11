@@ -102,6 +102,15 @@
             </select>
           </div>
         </div>
+        <div class="form-group" id="pet-group">
+          <label for="pet" data-i18n="book_service.pet_label">Pet</label>
+          <select id="pet">
+            <option value="" data-i18n="book_service.pet_none">Any / not specified</option>
+          </select>
+          <p class="note" id="pet-hint" style="display:none;">
+            <a href="my-dogs.html" data-i18n="book_service.add_pet_link">Add a pet in My Dogs</a>
+          </p>
+        </div>
         <div class="form-group" id="provider-group" style="display:none;">
           <label for="provider" data-i18n="book_service.provider_label">Service provider</label>
           <select id="provider">
@@ -154,7 +163,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
-<script src="js/book-service.js?v=3"></script>
+<script src="js/book-service.js?v=4"></script>
 <script>document.getElementById("sb-payment").innerHTML = paymentSectionHTML("sb-payment");</script>
 <script src="js/assistant.js"></script>
 </body>
