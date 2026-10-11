@@ -40,8 +40,8 @@ PROVIDER_GENDERS = ("Male", "Female")
 # Pricing  (Rs per hour for the FIRST dog)
 # ---------------------------------------------------------------------------
 RATES = {
-    "grooming": {"store": 600, "home": 900},
-    "training": {"store": 800, "home": 1200},
+    "grooming": {"store": 800, "home": 1000},
+    "training": {"store": 1000, "home": 1500},
 }
 HOME_TRAVEL_FEE = 150          # flat fee for home visits
 ADDITIONAL_DOG_FACTOR = 0.7    # each extra dog costs 70% of the hourly rate
