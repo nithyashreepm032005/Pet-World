@@ -298,12 +298,16 @@ async function renderServicesTab() {
       <button class="btn btn-primary" onclick="openServiceModal()" data-i18n="admin.add_service_cat">+ Add Service Category</button>
     </div>
     <table class="admin-table">
-      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_packages">Packages</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_rates">Rates (₹/hour)</th><th data-i18n="admin.th_packages">Packages</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
       <tbody>
         ${cachedServices.map(s => `
           <tr>
             <td>${thumb(resolveImageUrl(s.image), "🛁")}</td>
             <td><strong>${s.service_name}</strong><br><span class="card-meta">${s.description || ""}</span></td>
+            <td>
+              <div>🏪 <span data-i18n="admin.store_label">Store</span>: ${formatPrice(s.base_price || 0)}</div>
+              <div>🏠 <span data-i18n="admin.home_label">Home</span>: ${formatPrice(s.home_price || 0)}</div>
+            </td>
             <td>
               ${s.packages.map(p => `<div>${p.package_name} (${p.duration}) — ${formatPrice(p.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deletePackage(${p.id})">✕</span></div>`).join("") || t("admin.none", "None")}
               <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openPackageModal(${s.id})" data-i18n="admin.add_package">+ Add Package</button>
@@ -345,6 +349,8 @@ function openServiceModal(serviceId = null) {
     document.getElementById("s-name").value = s.service_name;
     document.getElementById("s-desc").value = s.description || "";
     document.getElementById("s-image").value = s.image || "";
+    document.getElementById("s-base-price").value = s.base_price != null ? s.base_price : "";
+    document.getElementById("s-home-price").value = s.home_price != null ? s.home_price : "";
     imagePath = s.image || "";
   }
   renderServiceImagePreview(imagePath);
@@ -369,6 +375,8 @@ document.getElementById("service-form").addEventListener("submit", async (e) => 
     service_name: document.getElementById("s-name").value.trim(),
     description: document.getElementById("s-desc").value.trim(),
     image: document.getElementById("s-image").value.trim(),
+    base_price: Number(document.getElementById("s-base-price").value) || 0,
+    home_price: Number(document.getElementById("s-home-price").value) || 0,
   };
   try {
     let saved;

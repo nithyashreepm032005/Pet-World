@@ -127,6 +127,11 @@ class Service(db.Model):
     description = db.Column(db.Text)
     image = db.Column(db.String(255))
     availability = db.Column(db.Boolean, default=True)
+    # Service pricing, in rupees per hour for the FIRST dog. These are the
+    # single source of truth for what a booking costs and are editable by the
+    # admin, so the customer pages and the booking API always agree.
+    base_price = db.Column(db.Numeric(10, 2), default=0)   # store service
+    home_price = db.Column(db.Numeric(10, 2), default=0)   # home service
 
     packages = db.relationship(
         "ServicePackage", backref="service", cascade="all, delete-orphan"
@@ -139,6 +144,8 @@ class Service(db.Model):
             "description": self.description,
             "image": self.image,
             "availability": self.availability,
+            "base_price": float(self.base_price) if self.base_price is not None else None,
+            "home_price": float(self.home_price) if self.home_price is not None else None,
         }
         if with_packages:
             data["packages"] = [p.to_dict() for p in self.packages]

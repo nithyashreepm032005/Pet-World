@@ -164,7 +164,7 @@ def quote(user):
     if hours not in ALLOWED_DURATIONS or dogs is None or not 1 <= dogs <= MAX_DOGS:
         return jsonify({"error": "Choose a valid duration and number of dogs."}), 400
 
-    return jsonify(calculate_price(service.service_name, mode, hours, dogs)), 200
+    return jsonify(calculate_price(service, mode, hours, dogs)), 200
 
 
 @service_bp.route("/service-bookings/check-location", methods=["POST"])
@@ -256,7 +256,7 @@ def create_service_booking(user):
                          "Please try the other option."
             }), 409
 
-    price = calculate_price(service.service_name, mode, hours, dogs)["total"]
+    price = calculate_price(service, mode, hours, dogs)["total"]
 
     try:
         payment_reference = validate_payment(

@@ -45,9 +45,14 @@ function renderServiceCard(service) {
          style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;"
          onerror="pwImgError(this)">`;
 
+  // Starting price comes from the backend (the same value the booking API
+  // charges), so the customer page and the booking page can never disagree.
   const packages = service.packages || [];
-  const priceHtml = packages.length
-    ? `<div class="card-price"><span data-i18n="services.from">From</span> ${formatPrice(Math.min(...packages.map(p => p.price)))}</div>`
+  const startingPrice = Number(service.base_price) > 0
+    ? Number(service.base_price)
+    : (packages.length ? Math.min(...packages.map(p => p.price)) : null);
+  const priceHtml = startingPrice != null
+    ? `<div class="card-price"><span data-i18n="services.from">From</span> ${formatPrice(startingPrice)}</div>`
     : "";
 
   const actionHtml = unavailable

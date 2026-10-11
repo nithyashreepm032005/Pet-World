@@ -19,6 +19,15 @@ ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
+def _to_price(value, default=0):
+    """Coerce an admin-supplied price to a non-negative float."""
+    try:
+        price = float(value)
+    except (TypeError, ValueError):
+        return default
+    return price if price >= 0 else default
+
+
 def _clean_image_path(value):
     """Keep only a web path/URL - never an absolute filesystem path."""
     value = (value or "").strip()
@@ -57,6 +66,8 @@ def admin_add_service():
         description=data.get("description", ""),
         image=_clean_image_path(data.get("image", "")),
         availability=data.get("availability", True),
+        base_price=_to_price(data.get("base_price"), 0),
+        home_price=_to_price(data.get("home_price"), 0),
     )
     db.session.add(service)
     db.session.flush()
@@ -83,6 +94,9 @@ def admin_edit_service(service_id):
     for field in ["service_name", "description", "image", "availability"]:
         if field in data:
             setattr(service, field, _clean_image_path(data[field]) if field == "image" else data[field])
+    for field in ["base_price", "home_price"]:
+        if field in data:
+            setattr(service, field, _to_price(data[field]))
     db.session.commit()
     return jsonify(service.to_dict()), 200
 

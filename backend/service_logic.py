@@ -39,9 +39,13 @@ PROVIDER_GENDERS = ("Male", "Female")
 # ---------------------------------------------------------------------------
 # Pricing  (Rs per hour for the FIRST dog)
 # ---------------------------------------------------------------------------
-RATES = {
-    "grooming": {"store": 800, "home": 1000},
-    "training": {"store": 1000, "home": 1500},
+# The authoritative rates live on the `services` table (base_price = store,
+# home_price = home) so the Admin Dashboard can change them without any code
+# edit. These defaults are only a fallback for a service whose rates haven't
+# been saved yet (e.g. a brand new service category).
+DEFAULT_RATES = {
+    "grooming": {"store": 1499, "home": 1875},
+    "training": {"store": 1999, "home": 2999},
 }
 HOME_TRAVEL_FEE = 150          # flat fee for home visits
 ADDITIONAL_DOG_FACTOR = 0.7    # each extra dog costs 70% of the hourly rate
@@ -51,14 +55,36 @@ def service_category(service_name):
     return "training" if "training" in (service_name or "").lower() else "grooming"
 
 
-def calculate_price(service_name, mode, hours, dogs):
-    """Returns a price breakdown dict. All amounts are whole rupees."""
-    rate = RATES[service_category(service_name)][mode]
+def rates_for_service(service):
+    """Return {'store': .., 'home': ..} for a service.
+
+    Prefers the rates stored on the Service row and falls back to
+    DEFAULT_RATES for the service's category. `service` may be a Service model
+    instance or any object exposing service_name / base_price / home_price.
+    """
+    base = getattr(service, "base_price", None)
+    home = getattr(service, "home_price", None)
+    try:
+        base, home = float(base), float(home)
+    except (TypeError, ValueError):
+        base = home = 0
+    if base > 0 and home > 0:
+        return {"store": base, "home": home}
+    return DEFAULT_RATES[service_category(getattr(service, "service_name", ""))]
+
+
+def calculate_price(service, mode, hours, dogs):
+    """Returns a price breakdown dict. All amounts are whole rupees.
+
+    `service` is a Service model instance (or a lightweight object with
+    service_name + base_price/home_price); its own saved rates drive the price.
+    """
+    rate = rates_for_service(service)[mode]
     first_dog = rate * hours
     additional = rate * hours * ADDITIONAL_DOG_FACTOR * (dogs - 1)
     travel = HOME_TRAVEL_FEE if mode == "home" else 0
     return {
-        "hourly_rate": rate,
+        "hourly_rate": round(rate),
         "first_dog": round(first_dog),
         "additional_dogs": round(additional),
         "travel_fee": travel,

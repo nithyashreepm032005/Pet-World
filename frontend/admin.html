@@ -121,6 +121,11 @@
       <input type="hidden" id="service-id">
       <div class="form-group"><label data-i18n="admin.service_name">Service Name</label><input id="s-name" required></div>
       <div class="form-group"><label data-i18n="admin.description">Description</label><textarea id="s-desc" rows="2"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label data-i18n="admin.store_price">Store price (₹/hour, 1st dog)</label><input type="number" min="0" step="1" id="s-base-price"></div>
+        <div class="form-group"><label data-i18n="admin.home_price">Home price (₹/hour, 1st dog)</label><input type="number" min="0" step="1" id="s-home-price"></div>
+      </div>
+      <p class="helper-text" data-i18n="admin.helper_service_price">This is the price customers are charged when booking (Store uses the store price, Home the home price). It updates the Services page and new bookings immediately.</p>
       <div class="form-group">
         <label data-i18n="admin.service_image">Service Image</label>
         <div id="s-image-preview" style="width:100%; height:150px; border-radius:10px; overflow:hidden; background:#f0e4d8; display:flex; align-items:center; justify-content:center; margin-bottom:8px; position:relative;"></div>

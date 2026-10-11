@@ -57,15 +57,23 @@ FOOD_WEIGHT_PRICES = [
 
 SERVICES = {
     "Grooming & Spa": [
-        ("Basic Bath & Brush", "45 mins", 599),
-        ("Full Grooming Package", "90 mins", 1299),
-        ("Spa Deluxe Package", "120 mins", 1999),
+        ("Basic Bath & Brush", "45 mins", 1499),
+        ("Full Grooming Package", "90 mins", 2499),
+        ("Spa Deluxe Package", "120 mins", 3499),
     ],
     "Training & Behavioral": [
-        ("Basic Obedience Training", "1 hour/session", 999),
-        ("Behavioral Correction Program", "1 hour/session", 1499),
-        ("Puppy Training Program", "45 mins/session", 899),
+        ("Puppy Training Program", "45 mins/session", 1999),
+        ("Basic Obedience Training", "1 hour/session", 2499),
+        ("Behavioral Correction Program", "1 hour/session", 2999),
     ],
+}
+
+# Hourly rate (Rs, first dog) per service, per mode. These drive the booking
+# price everywhere in the app; the cheapest Store booking is the service's
+# "starting price" (Grooming 1499, Training 1999).
+SERVICE_RATES = {
+    "Grooming & Spa": {"base": 1499, "home": 1875},
+    "Training & Behavioral": {"base": 1999, "home": 2999},
 }
 
 # Explicit image paths that actually exist under frontend/ - deriving them from
@@ -136,11 +144,14 @@ def seed():
         # ---- Services ----
         if Service.query.count() == 0:
             for service_name, packages in SERVICES.items():
+                rates = SERVICE_RATES.get(service_name, {})
                 service = Service(
                     service_name=service_name,
                     description=f"{service_name} services for your beloved pet.",
                     image=SERVICE_IMAGES.get(service_name, DEFAULT_SERVICE_IMAGE),
                     availability=True,
+                    base_price=rates.get("base", 0),
+                    home_price=rates.get("home", 0),
                 )
                 db.session.add(service)
                 db.session.flush()
