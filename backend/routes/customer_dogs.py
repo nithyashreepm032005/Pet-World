@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 
 from extensions import db
@@ -8,15 +6,6 @@ from customer_dog_models import CustomerDog
 from routes import current_user
 
 customer_dogs_bp = Blueprint("customer_dogs", __name__)
-
-
-def _parse_date(value):
-    if not value:
-        return None
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").date()
-    except ValueError:
-        raise ValueError("Dates must be in YYYY-MM-DD format.")
 
 
 @customer_dogs_bp.route("/my-dogs", methods=["GET"])
@@ -39,20 +28,10 @@ def add_my_dog():
     if not name:
         return jsonify({"error": "Please enter your dog's name."}), 400
 
-    try:
-        vaccination_date = _parse_date(data.get("vaccination_date"))
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-
-    interval_days = int(data.get("interval_days") or current_app.config["VACCINATION_INTERVAL_DAYS"])
-    next_date = CustomerDog.compute_next_date(vaccination_date, interval_days)
-
     dog = CustomerDog(
         user_id=user.id,
         name=name,
         breed=(data.get("breed") or "").strip(),
-        vaccination_date=vaccination_date,
-        next_vaccination_date=next_date,
         notes=(data.get("notes") or "").strip(),
     )
     db.session.add(dog)
@@ -76,14 +55,6 @@ def update_my_dog(dog_id):
         dog.breed = data["breed"].strip()
     if "notes" in data:
         dog.notes = data["notes"].strip()
-
-    if "vaccination_date" in data:
-        try:
-            dog.vaccination_date = _parse_date(data.get("vaccination_date"))
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
-        interval_days = int(data.get("interval_days") or current_app.config["VACCINATION_INTERVAL_DAYS"])
-        dog.next_vaccination_date = CustomerDog.compute_next_date(dog.vaccination_date, interval_days)
 
     db.session.commit()
     return jsonify(dog.to_dict()), 200

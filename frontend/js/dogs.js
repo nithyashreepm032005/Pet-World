@@ -97,7 +97,7 @@ function openDetailsModal(breedId) {
   document.getElementById("details-img").innerHTML =
     `<img src="${breed.image}" alt="${breed.breed_name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.style.background='${colorFor(breed.id)}'; this.remove();">`;
   document.getElementById("details-name").textContent = breed.breed_name;
-  document.getElementById("details-meta").textContent = `${breed.gender} · ${breed.color} · ${breed.vaccination_status}`;
+  document.getElementById("details-meta").textContent = [breed.gender, breed.color].filter(Boolean).join(" · ");
   document.getElementById("details-health").textContent = breed.health_information || "";
 
   document.getElementById("details-age-chips").innerHTML = variants.map(v => `

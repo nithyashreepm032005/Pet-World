@@ -178,24 +178,9 @@ KNOWLEDGE = [
         ],
         "label": {"en": "Go to My Dogs", "kn": "ನನ್ನ ನಾಯಿಗಳಿಗೆ ಹೋಗಿ", "hi": "मेरे कुत्ते पर जाएँ"},
         "reply": {
-            "en": "Go to My Dogs → + Add Dog. Enter the dog's name, breed, vaccination date, reminder interval and notes, then press Save. Edit or remove a dog from the same page.",
-            "kn": "ನನ್ನ ನಾಯಿಗಳಿಗೆ ಹೋಗಿ → + ನಾಯಿ ಸೇರಿಸಿ. ನಾಯಿಯ ಹೆಸರು, ತಳಿ, ಲಸಿಕೆ ದಿನಾಂಕ, ಜ್ಞಾಪನೆ ಅವಧಿ ಮತ್ತು ಟಿಪ್ಪಣಿಗಳನ್ನು ನಮೂದಿಸಿ, ನಂತರ ಉಳಿಸಿ ಒತ್ತಿರಿ. ಅದೇ ಪುಟದಲ್ಲಿ ಸಂಪಾದಿಸಬಹುದು ಅಥವಾ ತೆಗೆದುಹಾಕಬಹುದು.",
-            "hi": "मेरे कुत्ते खोलें → + कुत्ता जोड़ें। कुत्ते का नाम, नस्ल, टीके की तारीख, रिमाइंडर अंतराल और नोट्स भरें, फिर सहेजें दबाएँ। उसी पेज से संपादन या हटाना होगा।",
-        },
-    },
-    {
-        "id": "vaccination",
-        "href": "my-dogs.html",
-        "keywords": [
-            "vaccination", "vaccination date", "vaccine", "vaccinate",
-            "injection", "next due", "reminder",
-            "ಲಸಿಕೆ", "टीका", "टीकाकरण", "अगली तारीख",
-        ],
-        "label": {"en": "Go to My Dogs", "kn": "ನನ್ನ ನಾಯಿಗಳಿಗೆ ಹೋಗಿ", "hi": "मेरे कुत्ते पर जाएँ"},
-        "reply": {
-            "en": "Open My Dogs → press Edit on the dog → update the Vaccination Date and reminder interval (days) → Save. The 'Next Vaccination Due' date is recalculated automatically; always confirm the real schedule with your vet.",
-            "kn": "ನನ್ನ ನಾಯಿಗಳನ್ನು ತೆರೆಯಿರಿ → ನಾಯಿಯ ಮೇಲೆ ಸಂಪಾದಿಸಿ ಒತ್ತಿರಿ → ಲಸಿಕೆ ದಿನಾಂಕ ಮತ್ತು ಜ್ಞಾಪನೆ ಅವಧಿ (ದಿನಗಳು) ನವೀಕರಿಸಿ → ಉಳಿಸಿ. 'ಮುಂದಿನ ಲಸಿಕೆ' ದಿನಾಂಕ ತಾನಾಗಿಯೇ ಮರುಲೆಕ್ಕಹಾಕಲ್ಪಡುತ್ತದೆ; ನಿಜವಾದ ವೇಳಾಪಟ್ಟಿಯನ್ನು ಯಾವಾಗಲೂ ವೈದ್ಯರೊಂದಿಗೆ ದೃಢೀಕರಿಸಿ.",
-            "hi": "मेरे कुत्ते खोलें → कुत्ते पर संपादित करें दबाएँ → टीके की तारीख और रिमाइंडर अंतराल (दिन) अपडेट करें → सहेजें। 'अगला टीका' तारीख अपने आप फिर से गणना होती है; असली कार्यक्रम हमेशा अपने डॉक्टर से पुष्टि करें।",
+            "en": "Go to My Dogs → + Add Dog. Enter the dog's name, breed and notes, then press Save. Edit or remove a dog from the same page.",
+            "kn": "ನನ್ನ ನಾಯಿಗಳಿಗೆ ಹೋಗಿ → + ನಾಯಿ ಸೇರಿಸಿ. ನಾಯಿಯ ಹೆಸರು, ತಳಿ ಮತ್ತು ಟಿಪ್ಪಣಿಗಳನ್ನು ನಮೂದಿಸಿ, ನಂತರ ಉಳಿಸಿ ಒತ್ತಿರಿ. ಅದೇ ಪುಟದಲ್ಲಿ ಸಂಪಾದಿಸಬಹುದು ಅಥವಾ ತೆಗೆದುಹಾಕಬಹುದು.",
+            "hi": "मेरे कुत्ते खोलें → + कुत्ता जोड़ें। कुत्ते का नाम, नस्ल और नोट्स भरें, फिर सहेजें दबाएँ। उसी पेज से संपादन या हटाना होगा।",
         },
     },
     {
@@ -252,9 +237,9 @@ KNOWLEDGE = [
         ],
         "label": None,
         "reply": {
-            "en": "PetWorld has no veterinary booking page yet. Keep each dog's vaccination date in My Dogs and confirm the actual schedule with your own vet - I can open My Dogs for you.",
-            "kn": "ಪೆಟ್‌ವರ್ಲ್ಡ್‌ನಲ್ಲಿ ಇನ್ನೂ ವೈದ್ಯಕೀಯ ಬುಕಿಂಗ್ ಪುಟವಿಲ್ಲ. ಪ್ರತಿ ನಾಯಿಯ ಲಸಿಕೆ ದಿನಾಂಕವನ್ನು ನನ್ನ ನಾಯಿಗಳಲ್ಲಿ ಇಟ್ಟುಕೊಳ್ಳಿ ಮತ್ತು ನಿಜವಾದ ವೇಳಾಪಟ್ಟಿಯನ್ನು ನಿಮ್ಮ ವೈದ್ಯರೊಂದಿಗೆ ದೃಢೀಕರಿಸಿ - ನಾನು ನನ್ನ ನಾಯಿಗಳನ್ನು ತೆರೆಯಬಲ್ಲೆ.",
-            "hi": "पेटवर्ल्ड में अभी कोई पशु चिकित्सा बुकिंग पेज नहीं है। हर कुत्ते की टीके की तारीख मेरे कुत्तों में रखें और असली कार्यक्रम अपने डॉक्टर से पुष्टि करें - मैं मेरे कुत्ते खोल सकता हूँ।",
+            "en": "PetWorld has no veterinary booking page yet. For medical care, please contact your own vet directly.",
+            "kn": "ಪೆಟ್‌ವರ್ಲ್ಡ್‌ನಲ್ಲಿ ಇನ್ನೂ ವೈದ್ಯಕೀಯ ಬುಕಿಂಗ್ ಪುಟವಿಲ್ಲ. ವೈದ್ಯಕೀಯ ಆರೈಕೆಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸ್ವಂತ ವೈದ್ಯರನ್ನು ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಿ.",
+            "hi": "पेटवर्ल्ड में अभी कोई पशु चिकित्सा बुकिंग पेज नहीं है। चिकित्सा देखभाल के लिए कृपया सीधे अपने पशु चिकित्सक से संपर्क करें।",
         },
     },
     {
@@ -428,7 +413,7 @@ KNOWLEDGE = [
         ],
         "label": None,
         "reply": {
-            "en": "I guide you around this dashboard. Here is the map of PetWorld:\n• Dogs - browse and buy breeds\n• Food - MBN dog food\n• Services - book grooming or training\n• My Bookings - see/track appointments\n• My Dogs - add dogs & vaccination dates\n• My Orders - status, cancel, return\n• Cart / Checkout - buy things\n• Account - edit your profile\nAsk me anything about these and I'll point you to the right page.",
+            "en": "I guide you around this dashboard. Here is the map of PetWorld:\n• Dogs - browse and buy breeds\n• Food - MBN dog food\n• Services - book grooming or training\n• My Bookings - see/track appointments\n• My Dogs - keep a list of your own dogs\n• My Orders - status, cancel, return\n• Cart / Checkout - buy things\n• Account - edit your profile\nAsk me anything about these and I'll point you to the right page.",
             "kn": "ನಾನು ಈ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಿಮಗೆ ಮಾರ್ಗದರ್ಶನ ಮಾಡುತ್ತೇನೆ. ಪೆಟ್‌ವರ್ಲ್ಡ್‌ನ ನಕ್ಷೆ ಇಲ್ಲಿದೆ:\n• ನಾಯಿಗಳು - ತಳಿಗಳನ್ನು ನೋಡಿ ಖರೀದಿಸಿ\n• ಆಹಾರ - ಎಂಬಿಎನ್ ನಾಯಿ ಆಹಾರ\n• ಸೇವೆಗಳು - ಗ್ರೂಮಿಂಗ್ ಅಥವಾ ತರಬೇತಿ ಬುಕ್ ಮಾಡಿ\n• ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು - ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ನೋಡಿ/ಟ್ರ್ಯಾಕ್ ಮಾಡಿ\n• ನನ್ನ ನಾಯಿಗಳು - ನಾಯಿ ಮತ್ತು ಲಸಿಕೆ ದಿನಾಂಕ ಸೇರಿಸಿ\n• ನನ್ನ ಆರ್ಡರ್‌ಗಳು - ಸ್ಥಿತಿ, ರದ್ದು, ವಾಪಸಾತಿ\n• ಕಾರ್ಟ್ / ಚೆಕ್ಔಟ್ - ಖರೀದಿ\n• ಖಾತೆ - ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ\nಇವುಗಳ ಬಗ್ಗೆ ಏನನ್ನಾದರೂ ಕೇಳಿ, ಸರಿಯಾದ ಪುಟಕ್ಕೆ ಕರೆದುಕೊಂಡು ಹೋಗುತ್ತೇನೆ.",
             "hi": "मैं इस डैशबोर्ड में आपकी राह दिखाता हूँ। पेटवर्ल्ड का नक्शा:\n• कुत्ते - नस्लें देखें और खरीदें\n• खाना - एमबीएन डॉग फ़ूड\n• सेवाएँ - ग्रूमिंग या ट्रेनिंग बुक करें\n• मेरी बुकिंग - अपॉइंटमेंट देखें/ट्रैक करें\n• मेरे कुत्ते - कुत्ते और टीका तारीख जोड़ें\n• मेरे ऑर्डर - स्थिति, रद्द, वापसी\n• कार्ट / चेकआउट - खरीदारी\n• खाता - प्रोफ़ाइल संपादित करें\nइनके बारे में कुछ भी पूछें, मैं सही पेज पर ले जाऊँगा।",
         },
@@ -524,7 +509,7 @@ def _system_prompt(lang):
             ("book-service.html?service_id=N", "booking form for one service (date/time/mode/payment)"),
             ("bookings.html", "the customer's own bookings, with status and tracking link"),
             ("track-service.html?id=N", "live map tracking of a home-service booking"),
-            ("my-dogs.html", "add/edit the customer's dogs and vaccination dates"),
+            ("my-dogs.html", "add/edit the customer's own dogs"),
             ("orders.html", "the customer's orders, cancellation and returns"),
             ("cart.html", "shopping cart"),
             ("checkout.html", "delivery address + payment, places the order"),

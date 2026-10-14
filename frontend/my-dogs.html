@@ -21,7 +21,7 @@
     <button class="btn btn-primary btn-sm" onclick="openAddModal()" data-i18n="my_dogs.add_dog">+ Add Dog</button>
   </div>
 
-  <p class="helper-text" style="margin-bottom:18px;" data-i18n="my_dogs.helper">Keep track of your own dog's vaccination schedule. The "next due" date is just a configurable reminder — always confirm the actual schedule with your vet.</p>
+  <p class="helper-text" style="margin-bottom:18px;" data-i18n="my_dogs.helper">Keep a private list of your own dogs — their name, breed and any notes you want to remember.</p>
 
   <div id="my-dogs-list">
     <div class="spinner"></div>
@@ -37,15 +37,6 @@
       <input type="hidden" id="dog-id">
       <div class="form-group"><label data-i18n="my_dogs.dog_name">Dog's Name</label><input id="dog-name" required></div>
       <div class="form-group"><label data-i18n="my_dogs.breed">Breed</label><input id="dog-breed" data-i18n-ph="my_dogs.breed_ph" placeholder="e.g. Labrador Retriever"></div>
-      <div class="form-group">
-        <label data-i18n="my_dogs.vacc_date">Vaccination Date</label>
-        <input type="date" id="dog-vacc-date">
-      </div>
-      <div class="form-group">
-        <label data-i18n="my_dogs.interval">Reminder interval (days)</label>
-        <input type="number" id="dog-interval" value="365" min="1">
-        <p class="helper-text" data-i18n="my_dogs.interval_helper">Default 365 days — change this to match your vet's actual advice.</p>
-      </div>
       <div class="form-group"><label data-i18n="my_dogs.notes">Notes</label><textarea id="dog-notes" rows="2" data-i18n-ph="my_dogs.notes_ph" placeholder="Optional"></textarea></div>
       <p class="error-text" id="dog-error"></p>
       <button class="btn btn-primary btn-block" type="submit" data-i18n="common.save">Save</button>

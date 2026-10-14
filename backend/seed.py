@@ -25,16 +25,16 @@ AGE_PRICE_TABLE = [
 ]
 
 BREEDS = [
-    ("Labrador Retriever", "Friendly", "Golden/Black", "Fully Vaccinated"),
-    ("Golden Retriever", "Gentle", "Golden", "Fully Vaccinated"),
-    ("German Shepherd", "Loyal", "Black/Tan", "Fully Vaccinated"),
-    ("Beagle", "Playful", "Tricolor", "Fully Vaccinated"),
-    ("Shih Tzu", "Affectionate", "White/Brown", "Fully Vaccinated"),
-    ("Pomeranian", "Energetic", "Cream", "Fully Vaccinated"),
-    ("Rottweiler", "Protective", "Black/Tan", "Fully Vaccinated"),
-    ("Siberian Husky", "Active", "Grey/White", "Fully Vaccinated"),
-    ("Pug", "Charming", "Fawn", "Fully Vaccinated"),
-    ("Dachshund", "Curious", "Brown", "Fully Vaccinated"),
+    ("Labrador Retriever", "Friendly", "Golden/Black"),
+    ("Golden Retriever", "Gentle", "Golden"),
+    ("German Shepherd", "Loyal", "Black/Tan"),
+    ("Beagle", "Playful", "Tricolor"),
+    ("Shih Tzu", "Affectionate", "White/Brown"),
+    ("Pomeranian", "Energetic", "Cream"),
+    ("Rottweiler", "Protective", "Black/Tan"),
+    ("Siberian Husky", "Active", "Grey/White"),
+    ("Pug", "Charming", "Fawn"),
+    ("Dachshund", "Curious", "Brown"),
 ]
 
 FOOD_PRODUCTS = [
@@ -105,13 +105,12 @@ def seed():
 
         # ---- Dog breeds ----
         if DogBreed.query.count() == 0:
-            for name, gender, color, vacc in BREEDS:
+            for name, gender, color in BREEDS:
                 breed = DogBreed(
                     breed_name=name,
                     image=f"images/dogs/{name.lower().replace(' ', '_')}.jpg",
                     gender=gender,
                     color=color,
-                    vaccination_status=vacc,
                     health_information="Healthy and vet-checked.",
                     availability=True,
                 )

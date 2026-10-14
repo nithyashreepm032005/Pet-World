@@ -29,7 +29,6 @@ def admin_add_breed():
         image=data.get("image", ""),
         gender=data.get("gender", ""),
         color=data.get("color", ""),
-        vaccination_status=data.get("vaccination_status", ""),
         health_information=data.get("health_information", ""),
         availability=data.get("availability", True),
     )
@@ -55,7 +54,7 @@ def admin_edit_breed(breed_id):
     breed = DogBreed.query.get_or_404(breed_id)
     data = request.get_json(force=True)
     for field in ["breed_name", "image", "gender", "color",
-                  "vaccination_status", "health_information", "availability"]:
+                  "health_information", "availability"]:
         if field in data:
             setattr(breed, field, data[field])
     db.session.commit()

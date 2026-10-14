@@ -9,7 +9,7 @@ async function loadMyDogs() {
   try {
     myDogsCache = await api("/my-dogs");
     if (!myDogsCache.length) {
-      el.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3 data-i18n="my_dogs.empty_title">No dogs added yet</h3><p data-i18n="my_dogs.empty_text">Add your dog to start tracking its vaccination schedule.</p></div>`;
+      el.innerHTML = `<div class="empty-state"><div class="emoji">🐕</div><h3 data-i18n="my_dogs.empty_title">No dogs added yet</h3><p data-i18n="my_dogs.empty_text">Add your dog to keep your own private list.</p></div>`;
       return;
     }
     el.innerHTML = myDogsCache.map(renderDogCard).join("");
@@ -19,18 +19,11 @@ async function loadMyDogs() {
 }
 
 function renderDogCard(dog) {
-  const overdueBadge = dog.vaccination_overdue
-    ? `<span class="status-badge status-Cancelled" data-i18n="my_dogs.overdue">Overdue</span>`
-    : (dog.next_vaccination_date ? `<span class="status-badge status-Confirmed" data-i18n="my_dogs.on_track">On Track</span>` : "");
-
   return `
     <div class="list-card">
       <div class="list-card-head">
         <h4>🐶 ${dog.name}${dog.breed ? " — " + dog.breed : ""}</h4>
-        ${overdueBadge}
       </div>
-      <p class="card-meta"><span data-i18n="my_dogs.vacc_date_label">Vaccination Date:</span> ${dog.vaccination_date || t("common.not_set", "Not set")}</p>
-      <p class="card-meta"><span data-i18n="my_dogs.next_due_label">Next Vaccination Due:</span> ${dog.next_vaccination_date || t("common.not_set", "Not set")}</p>
       ${dog.notes ? `<p class="card-meta"><span data-i18n="my_dogs.notes_label">Notes:</span> ${dog.notes}</p>` : ""}
       <div style="margin-top:10px; display:flex; gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="openEditModal(${dog.id})" data-i18n="common.edit">Edit</button>
@@ -43,7 +36,6 @@ function renderDogCard(dog) {
 function openAddModal() {
   document.getElementById("dog-form").reset();
   document.getElementById("dog-id").value = "";
-  document.getElementById("dog-interval").value = 365;
   setI18nText(document.getElementById("dog-modal-title"), "my_dogs.modal_add", "Add Dog");
   document.getElementById("dog-error").textContent = "";
   document.getElementById("dog-modal").style.display = "flex";
@@ -54,8 +46,6 @@ function openEditModal(dogId) {
   document.getElementById("dog-id").value = dog.id;
   document.getElementById("dog-name").value = dog.name;
   document.getElementById("dog-breed").value = dog.breed || "";
-  document.getElementById("dog-vacc-date").value = dog.vaccination_date || "";
-  document.getElementById("dog-interval").value = 365;
   document.getElementById("dog-notes").value = dog.notes || "";
   setI18nText(document.getElementById("dog-modal-title"), "my_dogs.modal_edit", "Edit Dog");
   document.getElementById("dog-error").textContent = "";
@@ -75,8 +65,6 @@ document.getElementById("dog-form").addEventListener("submit", async (e) => {
   const payload = {
     name: document.getElementById("dog-name").value.trim(),
     breed: document.getElementById("dog-breed").value.trim(),
-    vaccination_date: document.getElementById("dog-vacc-date").value || null,
-    interval_days: parseInt(document.getElementById("dog-interval").value, 10) || 365,
     notes: document.getElementById("dog-notes").value.trim(),
   };
 

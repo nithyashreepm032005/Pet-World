@@ -52,7 +52,7 @@ async function renderDogsTab() {
       <button class="btn btn-primary" onclick="openBreedModal()" data-i18n="admin.add_breed">+ Add Breed</button>
     </div>
     <table class="admin-table">
-      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_breed">Breed</th><th data-i18n="admin.th_gender">Gender</th><th data-i18n="admin.th_color">Color</th><th data-i18n="admin.th_vaccination">Vaccination</th><th data-i18n="admin.th_availability">Availability</th><th data-i18n="admin.th_age_price">Age/Price Options</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_image">Image</th><th data-i18n="admin.th_breed">Breed</th><th data-i18n="admin.th_gender">Gender</th><th data-i18n="admin.th_color">Color</th><th data-i18n="admin.th_availability">Availability</th><th data-i18n="admin.th_age_price">Age/Price Options</th><th data-i18n="admin.th_actions">Actions</th></tr></thead>
       <tbody>
         ${cachedDogs.map(b => `
           <tr>
@@ -60,7 +60,6 @@ async function renderDogsTab() {
             <td><strong>${b.breed_name}</strong></td>
             <td>${b.gender || "-"}</td>
             <td>${b.color || "-"}</td>
-            <td>${b.vaccination_status || "-"}</td>
             <td>${b.availability ? '✅ <span data-i18n="common.available">Available</span>' : '❌ <span data-i18n="common.unavailable">Unavailable</span>'}</td>
             <td>
               ${b.variants.map(v => `<div>${v.age_months} ${t("admin.age_mo", "mo")} — ${formatPrice(v.price)} <span style="cursor:pointer;color:var(--danger)" onclick="deleteVariant(${v.id})">✕</span></div>`).join("") || t("admin.none", "None")}
@@ -93,7 +92,6 @@ function openBreedModal(breedId = null) {
     document.getElementById("b-name").value = b.breed_name;
     document.getElementById("b-gender").value = b.gender || "";
     document.getElementById("b-color").value = b.color || "";
-    document.getElementById("b-vacc").value = b.vaccination_status || "";
     document.getElementById("b-health").value = b.health_information || "";
     document.getElementById("b-image").value = b.image || "";
     document.getElementById("b-avail").value = String(b.availability);
@@ -109,7 +107,6 @@ document.getElementById("breed-form").addEventListener("submit", async (e) => {
     breed_name: document.getElementById("b-name").value.trim(),
     gender: document.getElementById("b-gender").value.trim(),
     color: document.getElementById("b-color").value.trim(),
-    vaccination_status: document.getElementById("b-vacc").value.trim(),
     health_information: document.getElementById("b-health").value.trim(),
     image: document.getElementById("b-image").value.trim(),
     availability: document.getElementById("b-avail").value === "true",
@@ -455,7 +452,7 @@ async function renderCustomersTab() {
       <thead><tr><th data-i18n="admin.th_user_id">User ID</th><th data-i18n="admin.th_name">Name</th><th data-i18n="admin.th_email">Email</th><th data-i18n="admin.th_phone">Phone</th><th data-i18n="admin.th_address">Address</th></tr></thead>
       <tbody>
         ${customers.map(c => `
-          <tr><td>${c.user_id}</td><td>${c.full_name}</td><td>${c.email}</td><td>${c.phone}</td><td>${c.address || "-"}</td></tr>
+          <tr><td>${c.user_id}</td><td>${c.full_name}</td><td>${c.email || "Not provided"}</td><td>${c.phone}</td><td>${c.address || "-"}</td></tr>
         `).join("")}
       </tbody>
     </table>

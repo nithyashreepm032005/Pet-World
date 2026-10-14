@@ -10,7 +10,8 @@ async function loadAccount() {
     document.getElementById("sidebar-userid").textContent = user.user_id;
     document.getElementById("a-userid").value = user.user_id;
     document.getElementById("a-name").value = user.full_name;
-    document.getElementById("a-email").value = user.email;
+    // Email is optional now - never assume a customer has one.
+    document.getElementById("a-email").value = user.email || "Not provided";
     document.getElementById("a-phone").value = user.phone;
     document.getElementById("a-address").value = user.address || "";
     setSession(getToken(), user); // refresh cached user

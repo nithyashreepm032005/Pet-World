@@ -7,7 +7,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(20), unique=True, nullable=False, index=True)
     full_name = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    # Email is OPTIONAL: customers register with Full Name, Phone, User ID and
+    # Password only. Existing accounts keep their stored email. MySQL allows
+    # any number of NULLs in a UNIQUE column, so old rows are untouched.
+    email = db.Column(db.String(120), unique=True, nullable=True)
     phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(255))
     password_hash = db.Column(db.String(255), nullable=False)
@@ -33,7 +36,6 @@ class DogBreed(db.Model):
     image = db.Column(db.String(255))
     gender = db.Column(db.String(20))
     color = db.Column(db.String(50))
-    vaccination_status = db.Column(db.String(50))
     health_information = db.Column(db.Text)
     availability = db.Column(db.Boolean, default=True)
 
@@ -48,7 +50,6 @@ class DogBreed(db.Model):
             "image": self.image,
             "gender": self.gender,
             "color": self.color,
-            "vaccination_status": self.vaccination_status,
             "health_information": self.health_information,
             "availability": self.availability,
         }

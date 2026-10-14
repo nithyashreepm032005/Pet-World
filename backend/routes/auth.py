@@ -26,25 +26,30 @@ def register():
     data = request.get_json(force=True)
 
     full_name = (data.get("full_name") or "").strip()
-    email = (data.get("email") or "").strip().lower()
     phone = (data.get("phone") or "").strip()
+    # Address is no longer collected at registration; it can be added later
+    # from the Account page. It is stored empty when not supplied.
     address = (data.get("address") or "").strip()
     # The customer creates their own User ID - no auto-generation, no email.
     user_id = (data.get("user_id") or "").strip().upper()
     password = data.get("password") or ""
     confirm_password = data.get("confirm_password") or ""
+    # Email is OPTIONAL now (the registration form no longer asks for it). If
+    # an email is still sent by an older client it is validated and stored;
+    # otherwise the account is created with no email at all.
+    email = (data.get("email") or "").strip().lower()
 
-    if not all([full_name, email, phone, address, user_id, password, confirm_password]):
-        return jsonify({"error": "All fields are required."}), 400
+    # Email and address are intentionally NOT required.
+    if not all([full_name, phone, user_id, password, confirm_password]):
+        return jsonify(
+            {"error": "Full name, phone number, User ID, password and confirm password are required."}
+        ), 400
 
     if not USER_ID_PATTERN.match(user_id):
         return jsonify(
             {"error": "User ID must be 4-20 characters and may only contain "
                       "letters, numbers, '-' and '_'."}
         ), 400
-
-    if not EMAIL_PATTERN.match(email):
-        return jsonify({"error": "Please enter a valid email address."}), 400
 
     if not re.match(r"^\d{10}$", _normalize_phone(phone)):
         return jsonify({"error": "Please enter a valid 10-digit phone number."}), 400
@@ -62,8 +67,13 @@ def register():
     if User.query.filter_by(user_id=user_id).first():
         return jsonify({"error": "This User ID is already taken. Please choose another."}), 409
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({"error": "An account with this email already exists."}), 409
+    if email:
+        if not EMAIL_PATTERN.match(email):
+            return jsonify({"error": "Please enter a valid email address."}), 400
+        if User.query.filter_by(email=email).first():
+            return jsonify({"error": "An account with this email already exists."}), 409
+    else:
+        email = None
 
     password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 

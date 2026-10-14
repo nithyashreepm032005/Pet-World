@@ -48,12 +48,6 @@ class Config:
     AI_BASE_URL = os.environ.get("AI_BASE_URL", "https://api.openai.com/v1")
     AI_MODEL = os.environ.get("AI_MODEL", "gpt-4o-mini")
     AI_TIMEOUT_SECONDS = int(os.environ.get("AI_TIMEOUT_SECONDS", "20"))
-    # ---- Vaccination scheduling ----
-    # Generic, configurable gap (in days) used to suggest a dog's next
-    # vaccination date. This is a placeholder default, NOT medical advice -
-    # change it to match your vet's actual guidance, or let it be
-    # overridden per-dog from the "My Dogs" page.
-    VACCINATION_INTERVAL_DAYS = int(os.environ.get("VACCINATION_INTERVAL_DAYS", 365))
 
     # ---- Store location (shown to customers for Store Service bookings) ----
     STORE_ADDRESS = "28, Bugle Rock Park, Basavanagudi, Bengaluru"

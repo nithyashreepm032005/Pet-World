@@ -10,7 +10,8 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(20) UNIQUE NOT NULL,
     full_name VARCHAR(120) NOT NULL,
-    email VARCHAR(120) UNIQUE NOT NULL,
+    -- Email is OPTIONAL now (registration only asks for name/phone/user id/password).
+    email VARCHAR(120) UNIQUE NULL,
     phone VARCHAR(20) NOT NULL,
     address VARCHAR(255),
     password_hash VARCHAR(255) NOT NULL,
@@ -24,7 +25,6 @@ CREATE TABLE dog_breeds (
     image VARCHAR(255),
     gender VARCHAR(20),
     color VARCHAR(50),
-    vaccination_status VARCHAR(50),
     health_information TEXT,
     availability BOOLEAN DEFAULT TRUE
 );
