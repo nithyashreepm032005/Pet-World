@@ -41,6 +41,9 @@ def _service_booking_admin_dict(b):
         "status": b.booking_status,
         "number_of_dogs": b.number_of_dogs,
         "payment_method": b.payment_method,
+        "address": b.address,
+        "latitude": float(b.latitude) if b.latitude is not None else None,
+        "longitude": float(b.longitude) if b.longitude is not None else None,
         "created_at": b.created_at.isoformat() if b.created_at else None,
     }
 

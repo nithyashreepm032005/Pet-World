@@ -14,6 +14,11 @@ let selected = { lat: null, lng: null, inBengaluru: false, checking: false };
 let quoteTimer = null;
 let lastQuote = null;
 let myPets = [];
+// How the customer chose the home-service location:
+//   "gps"    -> use the device's current location
+//   "map"    -> pick a point on the map
+//   "manual" -> type the address (no coordinates)
+let locationMethod = "gps";
 
 const $ = (id) => document.getElementById(id);
 
@@ -69,6 +74,8 @@ async function init() {
   $("date").addEventListener("change", () => { buildTimeSlots(); updateConfirmState(); });
   ["time", "duration", "dogs", "provider"].forEach(id => $(id).addEventListener("change", onOptionChange));
   $("address").addEventListener("input", updateConfirmState);
+  ["m-house", "m-building", "m-street", "m-area", "m-city", "m-state", "m-pincode", "m-landmark"]
+    .forEach(id => $(id).addEventListener("input", () => { syncManualPreview(); updateConfirmState(); }));
 
   $("confirm-btn").removeAttribute("disabled");
   updateConfirmState();
@@ -119,10 +126,91 @@ function setMode(newMode) {
   if (mode === "home") {
     if (!map) initMap();
     setTimeout(() => map.invalidateSize(), 150);
-    setTimeout(maybeAutoDetectLocation, 600);
+    // Only auto-detect when the customer is using GPS (the default method),
+    // so a manually typed address is never replaced by the device location.
+    if (locationMethod === "gps") setTimeout(maybeAutoDetectLocation, 600);
   }
   onOptionChange();
 }
+
+/* ------------------------------------------------- location method */
+function setLocationMethod(method) {
+  locationMethod = method;
+  const buttons = { gps: $("btn-gps"), map: $("btn-map"), manual: $("btn-manual") };
+  Object.keys(buttons).forEach((key) => {
+    if (buttons[key]) buttons[key].classList.toggle("active", key === method);
+  });
+
+  const isManual = method === "manual";
+  $("map-wrap").style.display = isManual ? "none" : "block";
+  $("manual-form").style.display = isManual ? "block" : "none";
+
+  if (isManual) {
+    // Manual entry never uses (or overwrites) GPS/map coordinates.
+    selected = { lat: null, lng: null, inBengaluru: false, checking: false };
+    if (marker && map) { map.removeLayer(marker); marker = null; }
+    $("loc-status").textContent = "";
+    $("loc-status").className = "loc-status wait";
+    syncManualPreview();
+  } else {
+    if (map) setTimeout(() => map.invalidateSize(), 150);
+    if (method === "map") focusMap();
+    if (method === "gps") detectCurrentLocation();
+  }
+  updateConfirmState();
+}
+
+function composeManualAddress() {
+  const house = $("m-house").value.trim();
+  const building = $("m-building").value.trim();
+  const street = $("m-street").value.trim();
+  const area = $("m-area").value.trim();
+  const city = $("m-city").value.trim();
+  const state = $("m-state").value.trim();
+  const pin = $("m-pincode").value.trim();
+  const landmark = $("m-landmark").value.trim();
+
+  const lines = [];
+  if (house || building) lines.push(building ? `${house}, ${building}` : house);
+  if (street) lines.push(street);
+  if (area) lines.push(area);
+  const cityLine = [city, state].filter(Boolean).join(", ");
+  if (cityLine || pin) lines.push(pin ? `${cityLine} - ${pin}` : cityLine);
+  if (landmark) lines.push(`${t("book_service.landmark_prefix", "Landmark")}: ${landmark}`);
+  return lines.filter((line) => line && line.trim() && line.trim() !== ",").join("\n");
+}
+
+function syncManualPreview() {
+  const preview = $("manual-preview");
+  if (!preview) return;
+  const address = composeManualAddress();
+  preview.textContent = address
+    ? `${t("book_service.service_address", "Service address")}: ${address.replace(/\n/g, ", ")}`
+    : "";
+  updateSummaryAddress();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Mirrors the address the booking will use into the price/summary card so the
+// customer can review it before confirming.
+function updateSummaryAddress() {
+  const el = $("summary-address");
+  if (!el) return;
+  if (mode !== "home") { el.style.display = "none"; return; }
+  const address = locationMethod === "manual" ? composeManualAddress() : $("address").value.trim();
+  if (!address) { el.style.display = "none"; return; }
+  el.innerHTML = `<strong>${t("book_service.service_address", "Service address")}:</strong>\n${escapeHtml(address)}`;
+  el.style.display = "block";
+}
+
 
 /* -------------------------------------------------------- map */
 function emojiIcon(emoji) {
@@ -176,6 +264,9 @@ async function reverseGeocode(lat, lng) {
 }
 
 async function setLocation(lat, lng, moveMap = true) {
+  // Ignore any late GPS/map result once the customer has switched to typing
+  // the address manually, so it can never touch a manual booking.
+  if (locationMethod === "manual") return;
   selected = { lat, lng, inBengaluru: false, checking: true };
   placeMarker(lat, lng);
   if (moveMap) map.setView([lat, lng], 16);
@@ -191,7 +282,10 @@ async function setLocation(lat, lng, moveMap = true) {
   // ignore if the user already moved the pin again
   if (selected.lat !== lat || selected.lng !== lng) return;
 
-  $("address").value = address || `Latitude ${lat.toFixed(5)}, Longitude ${lng.toFixed(5)}`;
+  // Never overwrite a manually typed address with a GPS/map result.
+  if (locationMethod !== "manual") {
+    $("address").value = address || `Latitude ${lat.toFixed(5)}, Longitude ${lng.toFixed(5)}`;
+  }
   selected.checking = false;
   if (!check) {
     setLocStatus("err", "book_service.loc_fail", "Could not verify your location. Please try again.");
@@ -205,7 +299,7 @@ async function setLocation(lat, lng, moveMap = true) {
 }
 
 function useMyLocation() {
-  detectCurrentLocation();
+  setLocationMethod("gps");
 }
 
 function detectCurrentLocation() {
@@ -239,7 +333,7 @@ function detectCurrentLocation() {
 let locationAutoAsked = false;
 
 async function maybeAutoDetectLocation() {
-  if (locationAutoAsked || mode !== "home" || !navigator.geolocation) return;
+  if (locationAutoAsked || mode !== "home" || locationMethod !== "gps" || !navigator.geolocation) return;
   locationAutoAsked = true;
   try {
     if (navigator.permissions && navigator.permissions.query) {
@@ -289,7 +383,9 @@ function bookingValidationMessages() {
   if (!$("date").value) msgs.push(t("book_service.err_date", "Please select a date."));
   if (!$("time").value) msgs.push(t("book_service.err_time", "Please select a time."));
   if (mode === "home") {
-    if (!selected.lat || !selected.lng) {
+    if (locationMethod === "manual") {
+      msgs.push(...manualAddressErrors());
+    } else if (!selected.lat || !selected.lng) {
       msgs.push(t("book_service.err_location", "Please select your location for home service."));
     } else if (selected.checking) {
       msgs.push(t("book_service.loc_detecting", "Detecting your current location…"));
@@ -302,11 +398,29 @@ function bookingValidationMessages() {
   return msgs;
 }
 
+function manualAddressErrors() {
+  const errors = [];
+  const required = ["m-house", "m-street", "m-area", "m-city", "m-state", "m-pincode"];
+  if (required.some((id) => !$(id).value.trim())) {
+    errors.push(t("book_service.err_manual_required", "Please fill in all required address fields."));
+  }
+  const pin = $("m-pincode").value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    errors.push(t("book_service.err_pincode", "Please enter a valid 6-digit PIN code."));
+  }
+  const city = $("m-city").value.trim().toLowerCase();
+  if (city && city !== "bengaluru" && city !== "bangalore") {
+    errors.push(t("book_service.loc_outside", "Home service is currently available only within Bengaluru."));
+  }
+  return [...new Set(errors)];
+}
+
 function updateConfirmState() {
   const msgs = bookingValidationMessages();
   $("book-error").textContent = msgs.length
     ? t("book_service.err_required_prefix", "Almost there:") + " " + msgs.join(" ")
     : "";
+  updateSummaryAddress();
 }
 
 async function confirmBooking() {
@@ -331,10 +445,18 @@ async function confirmBooking() {
     number_of_dogs: parseInt($("dogs").value, 10),
   };
   if (mode === "home") {
-    body.latitude = selected.lat;
-    body.longitude = selected.lng;
-    body.address = $("address").value.trim();
     body.provider_gender = $("provider").value;
+    if (locationMethod === "manual") {
+      // Typed address, saved without any (possibly fake) coordinates.
+      body.location_method = "manual";
+      body.address = composeManualAddress();
+      body.city = $("m-city").value.trim();
+    } else {
+      body.location_method = "coordinates";
+      body.latitude = selected.lat;
+      body.longitude = selected.lng;
+      body.address = $("address").value.trim();
+    }
   }
   const pet = selectedPet();
   if (pet) {
@@ -372,6 +494,14 @@ function showSuccessPanel(booking) {
 
   const isHome = booking.service_mode === "home";
   $("success-track").style.display = isHome ? "inline-block" : "none";
+
+  const addressRow = $("success-address-row");
+  if (isHome && booking.address) {
+    $("success-address").textContent = booking.address;
+    addressRow.style.display = "flex";
+  } else {
+    addressRow.style.display = "none";
+  }
 
   $("success-view-bookings").onclick = () => { window.location.href = "bookings.html"; };
   $("success-track").onclick = () => { window.location.href = `track-service.html?id=${booking.id}`; };

@@ -35,6 +35,16 @@ let PW_ASSISTANT_BUSY = false;
 let PW_ASSISTANT_GREETED = false;
 let PW_ASSISTANT_SUGGESTIONS = null; // follow-ups suggested by the last reply
 
+// The assistant is a customer-facing dashboard guide only. Never show it on
+// the admin dashboard (or any admin page), even if the shared script is ever
+// included there by mistake. Customers keep it on every other page.
+function pwAssistantDisabled() {
+  const page = (window.location.pathname.split("/").pop() || "").toLowerCase();
+  if (page === "admin.html") return true;
+  if (typeof isAdmin === "function" && isAdmin()) return true;
+  return false;
+}
+
 function pwAssistantAllowedHref(href) {
   if (typeof href !== "string" || href.length > 120) return false;
   const [page, query] = href.split("?");
@@ -200,6 +210,7 @@ function pwAssistantClose() {
 }
 
 function pwAssistantInit() {
+  if (pwAssistantDisabled()) return;
   if (document.getElementById("pw-assistant")) return;
 
   const root = document.createElement("div");

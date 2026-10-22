@@ -92,6 +92,27 @@ def _parse_coords(data):
     return lat, lng
 
 
+# Recognised spellings of the city Home Service is available in. Used to
+# validate a manually typed address, which has no coordinates to check.
+BENGALURU_NAMES = ("bengaluru", "bangalore")
+
+
+def _manual_address_in_bengaluru(data, address):
+    """Best-effort check that a manually entered (coordinate-less) address is
+    inside Bengaluru.
+
+    A manual address has no latitude/longitude, so we cannot test a point
+    against the city bounding box. Instead we trust the structured City field
+    when the frontend sends it, and otherwise look for the city name in the
+    address text. No coordinates are ever invented for a manual address.
+    """
+    city = (data.get("city") or "").strip().lower()
+    if city:
+        return city in BENGALURU_NAMES
+    text = (address or "").lower()
+    return any(name in text for name in BENGALURU_NAMES)
+
+
 def _new_booking_id():
     while True:
         booking_id = "SB" + "".join(random.choices("0123456789", k=8))
@@ -236,14 +257,23 @@ def create_service_booking(user):
 
     if mode == "home":
         lat, lng = _parse_coords(data)
-        if lat is None:
-            return jsonify({"error": "Please select your location for home service."}), 400
-        if not in_bengaluru(lat, lng):
-            return jsonify({"error": OUTSIDE_BENGALURU_MESSAGE}), 400
 
         address = (data.get("address") or "").strip()
         if len(address) < 5:
             return jsonify({"error": "Please provide your address."}), 400
+
+        if lat is not None:
+            # GPS / map pin: the exact point must be inside Bengaluru.
+            if not in_bengaluru(lat, lng):
+                return jsonify({"error": OUTSIDE_BENGALURU_MESSAGE}), 400
+        else:
+            # No coordinates: only a manually typed address may be saved this
+            # way. Validate the address itself - never invent coordinates.
+            location_method = (data.get("location_method") or "").strip().lower()
+            if location_method != "manual":
+                return jsonify({"error": "Please select your location for home service."}), 400
+            if not _manual_address_in_bengaluru(data, address):
+                return jsonify({"error": OUTSIDE_BENGALURU_MESSAGE}), 400
 
         provider_gender = data.get("provider_gender")
         if provider_gender not in PROVIDER_GENDERS:

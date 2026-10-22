@@ -561,7 +561,7 @@ async function renderBookingsTab() {
   }
   el.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th data-i18n="admin.th_booking_id">Booking ID</th><th data-i18n="admin.th_customer">Customer</th><th data-i18n="admin.th_pet">Pet</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_date">Date</th><th data-i18n="admin.th_time">Time</th><th data-i18n="admin.th_price">Price</th><th data-i18n="admin.th_status">Status</th></tr></thead>
+      <thead><tr><th data-i18n="admin.th_booking_id">Booking ID</th><th data-i18n="admin.th_customer">Customer</th><th data-i18n="admin.th_pet">Pet</th><th data-i18n="admin.th_service">Service</th><th data-i18n="admin.th_service_address">Service Address</th><th data-i18n="admin.th_date">Date</th><th data-i18n="admin.th_time">Time</th><th data-i18n="admin.th_price">Price</th><th data-i18n="admin.th_status">Status</th></tr></thead>
       <tbody>
         ${bookings.map(b => `
           <tr>
@@ -569,6 +569,7 @@ async function renderBookingsTab() {
             <td>${b.customer_name || "-"}<br><span class="card-meta">${b.customer_user_id || ""}${b.customer_phone ? " · " + b.customer_phone : ""}</span></td>
             <td>${b.pet_name || "—"}</td>
             <td>${b.service_name || "-"}${b.package_name ? " (" + b.package_name + ")" : ""}${b.service_mode === "home" ? ' <span class="card-meta">🏠</span>' : ""}</td>
+            <td>${b.address || "—"}</td>
             <td>${b.booking_date || "-"}</td>
             <td>${b.booking_time || "-"}</td>
             <td>${formatPrice(b.price)}</td>

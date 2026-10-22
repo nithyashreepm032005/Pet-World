@@ -21,6 +21,9 @@
   #map { height:340px; border-radius:16px; margin:12px 0; z-index:0; }
   .emoji-marker { font-size:30px; line-height:34px; text-align:center; background:none; border:none; }
   .loc-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+  .loc-method-btn.active { box-shadow: inset 0 0 0 2px var(--primary); font-weight:700; }
+  .summary-address { font-size:13px; color:var(--text-dark); background:#fff3ea; border-radius:12px; padding:10px 12px; margin-bottom:14px; white-space:pre-line; }
+  .summary-address strong { color:var(--text-muted); font-weight:600; }
   .loc-status { font-size:13px; font-weight:600; margin:6px 0 12px; min-height:20px; }
   .loc-status.ok { color:var(--success); }
   .loc-status.err { color:var(--danger); }
@@ -67,14 +70,62 @@
         <div id="home-section" style="display:none;">
           <h3 style="margin-bottom:6px;" data-i18n="book_service.location_title">📍 Your Location</h3>
           <div class="loc-buttons">
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-gps" onclick="useMyLocation()" data-i18n="book_service.use_location">🎯 Use My Current Location</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="focusMap()" data-i18n="book_service.pick_map">🗺️ Select Location on Map</button>
+            <button type="button" class="btn btn-secondary btn-sm loc-method-btn active" id="btn-gps" onclick="useMyLocation()" data-i18n="book_service.use_location">🎯 Use My Current Location</button>
+            <button type="button" class="btn btn-outline btn-sm loc-method-btn" id="btn-map" onclick="setLocationMethod('map')" data-i18n="book_service.pick_map">🗺️ Select Location on Map</button>
+            <button type="button" class="btn btn-outline btn-sm loc-method-btn" id="btn-manual" onclick="setLocationMethod('manual')" data-i18n="book_service.manual_option">✍️ Enter Address Manually</button>
           </div>
-          <div id="map"></div>
-          <div class="loc-status wait" id="loc-status" data-i18n="book_service.loc_idle">Tap the map or use your current location to drop a pin (you can drag it).</div>
-          <div class="form-group">
-            <label for="address" data-i18n="book_service.address">Address</label>
-            <textarea id="address" rows="2" data-i18n-ph="book_service.address_ph" placeholder="House / flat, street, area — auto-filled from the map, you can edit it"></textarea>
+
+          <div id="map-wrap">
+            <div id="map"></div>
+            <div class="loc-status wait" id="loc-status" data-i18n="book_service.loc_idle">Tap the map or use your current location to drop a pin (you can drag it).</div>
+            <div class="form-group">
+              <label for="address" data-i18n="book_service.address">Address</label>
+              <textarea id="address" rows="2" data-i18n-ph="book_service.address_ph" placeholder="House / flat, street, area — auto-filled from the map, you can edit it"></textarea>
+            </div>
+          </div>
+
+          <!-- Manual address entry (no GPS / map needed) -->
+          <div id="manual-form" style="display:none;">
+            <p class="note" data-i18n="book_service.manual_help">Enter the address where the service should be provided, even if it is different from your current location. GPS is not required.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="m-house" data-i18n="book_service.house_label">House/Flat Number</label>
+                <input type="text" id="m-house" autocomplete="address-line1">
+              </div>
+              <div class="form-group">
+                <label for="m-building" data-i18n="book_service.building_label">Building or Apartment Name (optional)</label>
+                <input type="text" id="m-building">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="m-street" data-i18n="book_service.street_label">Street/Road Name</label>
+              <input type="text" id="m-street" autocomplete="address-line2">
+            </div>
+            <div class="form-group">
+              <label for="m-area" data-i18n="book_service.area_label">Area/Locality</label>
+              <input type="text" id="m-area" autocomplete="address-level3">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="m-city" data-i18n="book_service.city_label">City</label>
+                <input type="text" id="m-city" value="Bengaluru" autocomplete="address-level2">
+              </div>
+              <div class="form-group">
+                <label for="m-state" data-i18n="book_service.state_label">State</label>
+                <input type="text" id="m-state" value="Karnataka" autocomplete="address-level1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="m-pincode" data-i18n="book_service.pincode_label">PIN Code</label>
+                <input type="text" id="m-pincode" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+              </div>
+              <div class="form-group">
+                <label for="m-landmark" data-i18n="book_service.landmark_label">Landmark or Additional Directions (optional)</label>
+                <input type="text" id="m-landmark">
+              </div>
+            </div>
+            <p class="note" id="manual-preview" style="font-weight:600;"></p>
           </div>
           <hr style="border:none; border-top:2px dashed #f0e4d8; margin:18px 0;">
         </div>
@@ -130,6 +181,7 @@
     <!-- Price + confirm -->
     <div class="summary-card">
       <h3 style="margin-bottom:16px;" data-i18n="common.price">Price</h3>
+      <div id="summary-address" class="summary-address" style="display:none;"></div>
       <div id="price-box"><p class="helper-text" data-i18n="book_service.select_options_hint">Select your options to see the price.</p></div>
       <p class="error-text" id="book-error"></p>
       <button class="btn btn-primary btn-block" id="confirm-btn" onclick="confirmBooking()" disabled data-i18n="book_service.confirm_booking">Confirm Booking</button>
@@ -143,6 +195,7 @@
     <h2 id="success-message" style="margin:0 0 10px;">Your service has been booked successfully.</h2>
     <div class="success-rows">
       <div class="detail-row"><span data-i18n="admin.th_service">Service</span><span id="success-service"></span></div>
+      <div class="detail-row" id="success-address-row" style="display:none;"><span data-i18n="book_success.address">Service address</span><span id="success-address"></span></div>
       <div class="detail-row"><span data-i18n="book_success.pet">Pet(s)</span><span id="success-pet"></span></div>
       <div class="detail-row"><span data-i18n="book_service.date">Date</span><span id="success-date"></span></div>
       <div class="detail-row"><span data-i18n="book_service.time">Time</span><span id="success-time"></span></div>
@@ -163,7 +216,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
-<script src="js/book-service.js?v=4"></script>
+<script src="js/book-service.js?v=5"></script>
 <script>document.getElementById("sb-payment").innerHTML = paymentSectionHTML("sb-payment");</script>
 <script src="js/assistant.js"></script>
 </body>

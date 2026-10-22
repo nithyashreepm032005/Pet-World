@@ -276,7 +276,21 @@
     "loc_detecting": "Detecting your current location…",
     "pet_label": "Pet (optional)",
     "pet_none": "Any / not specified",
-    "add_pet_link": "Add a pet in My Dogs"
+    "add_pet_link": "Add a pet in My Dogs",
+    "manual_option": "✍️ Enter Address Manually",
+    "manual_help": "Enter the address where the service should be provided, even if it is different from your current location. GPS is not required.",
+    "house_label": "House/Flat Number",
+    "building_label": "Building or Apartment Name (optional)",
+    "street_label": "Street/Road Name",
+    "area_label": "Area/Locality",
+    "city_label": "City",
+    "state_label": "State",
+    "pincode_label": "PIN Code",
+    "landmark_label": "Landmark or Additional Directions (optional)",
+    "landmark_prefix": "Landmark",
+    "err_manual_required": "Please fill in all required address fields.",
+    "err_pincode": "Please enter a valid 6-digit PIN code.",
+    "service_address": "Service address"
   },
   "book_success": {
     "message": "Your service has been booked successfully.",
@@ -286,13 +300,16 @@
     "track": "📍 Track Employee",
     "view_bookings": "🗓️ View My Bookings",
     "close": "Close",
-    "redirect_note": "You will be redirected automatically…"
+    "redirect_note": "You will be redirected automatically…",
+    "address": "Service address"
   },
   "track": {
     "title": "Track Your Service 📍",
     "booking_details": "Booking Details",
     "status": "Status",
     "legend": "🏠 Your location   🚗 Employee location",
+    "map_unavailable": "Map location is unavailable for this address.",
+    "map_locating": "Locating the service address on the map…",
     "footer": "🐾 PetWorld — The map refreshes automatically every 5 seconds.",
     "emp_at_location": "Employee is at your location",
     "emp_away": "Employee is about {km} km away",
@@ -436,7 +453,8 @@
     "service_saved": "Service saved!",
     "th_package": "Package",
     "variant_added": "Age option added!",
-    "weight_added": "Weight option added!"
+    "weight_added": "Weight option added!",
+    "th_service_address": "Service Address"
   },
   "login": {
     "tagline": "Your pet's favourite online store",

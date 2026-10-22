@@ -26,6 +26,8 @@
   .detail-row span:first-child { color:var(--text-muted); }
   .detail-row span:last-child { font-weight:600; text-align:right; }
   .legend { font-size:13px; color:var(--text-muted); margin-top:10px; }
+  .map-message { border-radius:14px; padding:16px; margin-top:0; background:#fff8e1; color:#8a6d00;
+                 font-weight:600; font-size:14px; text-align:center; }
 </style>
 </head>
 <body>
@@ -45,6 +47,7 @@
       <div class="live-banner" id="banner">Loading…</div>
       <div class="panel">
         <div id="map"></div>
+        <div id="map-message" class="map-message" style="display:none;"></div>
         <p class="legend" data-i18n="track.legend">🏠 Your location &nbsp;&nbsp; 🚗 Employee location</p>
         <p class="legend" id="distance-line"></p>
       </div>
@@ -67,7 +70,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
-<script src="js/track-service.js?v=1"></script>
+<script src="js/track-service.js?v=2"></script>
 <script src="js/assistant.js"></script>
 </body>
 </html>
