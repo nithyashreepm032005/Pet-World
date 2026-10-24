@@ -33,7 +33,8 @@ from service_logic import (
     ALLOWED_DURATIONS, MAX_DOGS, FIRST_SLOT, LAST_SLOT, PROVIDER_GENDERS,
     OUTSIDE_BENGALURU_MESSAGE, in_bengaluru, calculate_price,
     TRANSITIONS, ACTIVE_TRACKING, OPEN_STATUSES,
-    STATUS_CONFIRMED, STATUS_COMPLETED,
+    STATUS_CONFIRMED, STATUS_ASSIGNED, STATUS_ON_THE_WAY, STATUS_ARRIVED,
+    STATUS_STARTED, STATUS_COMPLETED,
 )
 from utils import validate_payment
 
@@ -135,6 +136,48 @@ def _pick_employee(gender):
     return min(employees, key=workload)
 
 
+def _employee_state(b):
+    """Derive employee assignment/travel state from the saved booking.
+
+    The booking status is the single source of truth: it is only ever changed
+    through the employee action endpoints (or the admin dashboard), so the
+    details shown to the customer always match the database.
+    """
+    assigned = bool(b.employee_id and b.employee)
+    if not assigned:
+        return {
+            "employee_assigned": False,
+            "employee_accepted": False,
+            "assignment_status": "not_assigned",
+            "travel_status": "not_started",
+        }
+
+    status = b.booking_status
+    if status == STATUS_CONFIRMED:
+        assignment, travel = "awaiting_acceptance", "not_started"
+    elif status == STATUS_ASSIGNED:
+        assignment, travel = "accepted", "not_travelling"
+    elif status == STATUS_ON_THE_WAY:
+        assignment, travel = "accepted", "travelling"
+    elif status == STATUS_ARRIVED:
+        assignment, travel = "accepted", "arrived"
+    elif status == STATUS_STARTED:
+        assignment, travel = "accepted", "in_service"
+    elif status == STATUS_COMPLETED:
+        assignment, travel = "completed", "completed"
+    elif status == "Cancelled":
+        assignment, travel = "cancelled", "cancelled"
+    else:
+        assignment, travel = "accepted", "not_travelling"
+
+    return {
+        "employee_assigned": True,
+        "employee_accepted": assignment in ("accepted", "completed", "cancelled"),
+        "assignment_status": assignment,
+        "travel_status": travel,
+    }
+
+
 def booking_to_dict(b, include_customer=False):
     data = {
         "id": b.id,
@@ -159,6 +202,7 @@ def booking_to_dict(b, include_customer=False):
         "payment_method": b.payment_method,
         "payment_reference": b.payment_reference,
     }
+    data.update(_employee_state(b))
     if include_customer:
         data["customer_name"] = b.user.full_name
         data["customer_phone"] = b.user.phone
@@ -347,11 +391,11 @@ def get_my_service_booking(user, booking_id):
 @customer_required
 def track_employee(user, booking_id):
     # Only the customer who owns this booking can see it (others get 404).
+    # Details are available for both store and home bookings; live location
+    # only ever exists for an active home-service visit.
     b = ServiceBooking.query.filter_by(id=booking_id, user_id=user.id).first_or_404()
-    if b.service_mode != "home":
-        return jsonify({"error": "Tracking is only available for home service bookings."}), 400
 
-    tracking_active = b.booking_status in ACTIVE_TRACKING
+    tracking_active = b.service_mode == "home" and b.booking_status in ACTIVE_TRACKING
     employee_location = None
     if tracking_active:
         row = EmployeeLocation.query.filter_by(booking_id=b.id).first()

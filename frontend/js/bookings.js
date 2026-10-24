@@ -31,7 +31,6 @@ async function loadBookings() {
 function renderServiceBooking(b) {
   const [bg, fg] = STATUS_COLORS[b.status] || ["#eee", "#333"];
   const isHome = b.service_mode === "home";
-  const canTrack = isHome && b.status !== "Service Completed";
   const hrs = b.duration_hours === 1
     ? `1 <span data-i18n="common.hour">hour</span>`
     : `${b.duration_hours} <span data-i18n="common.hours">hours</span>`;
@@ -46,7 +45,7 @@ function renderServiceBooking(b) {
       ${isHome ? `<p class="card-meta">📍 ${b.address}</p><p class="card-meta">👤 ${b.employee_name || t("bookings.employee_pending", "Employee will be assigned")} (${b.provider_gender})</p>` : `<p class="card-meta" data-i18n="bookings.bring_store">Bring your pet to the PetWorld store at the booked time.</p>`}
       <p class="card-meta"><span data-i18n="common.paid_via">💳 Paid via:</span> ${b.payment_method || "COD"} ${b.payment_reference ? "(" + b.payment_reference + ")" : ""}</p>
       <div class="summary-total" style="margin:8px 0 0; border:0; padding:0;"><span data-i18n="common.price">Price</span><span>${formatPrice(b.price)}</span></div>
-      ${canTrack ? `<a class="btn btn-secondary btn-sm" style="margin-top:12px;" href="track-service.html?id=${b.id}" data-i18n="bookings.track_employee">📍 Track Employee</a>` : ""}
+      <a class="btn btn-secondary btn-sm" style="margin-top:12px;" href="track-service.html?id=${b.id}" data-i18n="bookings.view_booking_details">View Booking Details</a>
     </div>`;
 }
 

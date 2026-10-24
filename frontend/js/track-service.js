@@ -33,6 +33,15 @@ function validCoord(lat, lng) {
          typeof lng === "number" && Number.isFinite(lng);
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function emojiIcon(emoji) {
   return L.divIcon({ className: "emoji-marker", html: emoji, iconSize: [36, 36], iconAnchor: [18, 18] });
 }
@@ -204,12 +213,16 @@ function renderDetails(b) {
     ["book_service.address", "Address", b.address || "—"],
   ];
   $("details").innerHTML = rows
-    .map(([key, label, value]) => `<div class="detail-row"><span data-i18n="${key}">${label}</span><span>${value}</span></div>`)
+    .map(([key, label, value]) => `<div class="detail-row"><span data-i18n="${key}">${label}</span><span>${escapeHtml(value)}</span></div>`)
     .join("");
 }
 
 function renderSteps(status) {
   const idx = STEPS.indexOf(status);
+  if (idx < 0) {
+    $("steps").innerHTML = `<li class="current"><span class="dot">!</span><span>${escapeHtml(status || "—")}</span></li>`;
+    return;
+  }
   $("steps").innerHTML = STEPS.map((s, i) => {
     const cls = i < idx ? "done" : i === idx ? "current" : "";
     const dot = i <= idx ? "✓" : "";
@@ -217,44 +230,142 @@ function renderSteps(status) {
   }).join("");
 }
 
-function renderBanner(d) {
-  const b = d.booking;
-  const banner = $("banner");
-  banner.className = "live-banner";
-  const name = b.employee_name || t("track.your_employee", "Your employee");
-  switch (b.status) {
-    case "Booking Confirmed":
-      setStatusText(banner, [["track.banner_confirmed", "✅ Booking confirmed. Waiting for the employee to accept."]]);
-      break;
-    case "Employee Assigned":
-      setStatusText(banner, [`👤 ${name} `, ["track.banner_assigned", "has accepted your booking and will start travelling soon."]]);
-      break;
-    case "On the Way":
-      setStatusText(banner, [`🚗 ${name} `, ["track.banner_on_way", "is on the way to your home!"]]);
-      banner.classList.add("green");
-      break;
-    case "Arrived":
-      setStatusText(banner, [`📍 ${name} `, ["track.banner_arrived", "has arrived at your location."]]);
-      banner.classList.add("green");
-      break;
-    case "Service Started":
-      setStatusText(banner, [["track.banner_started", "✂️ Your service has started."]]);
-      banner.classList.add("green");
-      break;
-    case "Service Completed":
-      setStatusText(banner, [["track.banner_completed", "🎉 Service completed. Thank you for choosing PetWorld!"]]);
-      banner.classList.add("green");
-      break;
-    default:
-      setStatusText(banner, [b.status]);
+// The backend derives these fields from the saved booking status. The fallback
+// keeps the page correct if an older API response is cached in the browser.
+function employeeState(b) {
+  const assigned = typeof b.employee_assigned === "boolean"
+    ? b.employee_assigned
+    : !!b.employee_name;
+  let assignment = b.assignment_status;
+  let travel = b.travel_status;
+
+  if (!assignment) {
+    if (!assigned) assignment = "not_assigned";
+    else if (b.status === "Booking Confirmed") assignment = "awaiting_acceptance";
+    else if (b.status === "Service Completed") assignment = "completed";
+    else if (b.status === "Cancelled") assignment = "cancelled";
+    else assignment = "accepted";
   }
+  if (!travel) {
+    travel = {
+      "Booking Confirmed": "not_started",
+      "Employee Assigned": "not_travelling",
+      "On the Way": "travelling",
+      "Arrived": "arrived",
+      "Service Started": "in_service",
+      "Service Completed": "completed",
+      "Cancelled": "cancelled",
+    }[b.status] || "not_travelling";
+  }
+
+  const accepted = typeof b.employee_accepted === "boolean"
+    ? b.employee_accepted
+    : ["accepted", "completed"].includes(assignment);
+
+  return { assigned, accepted, assignment, travel };
+}
+
+function assignmentLabel(state) {
+  switch (state.assignment) {
+    case "not_assigned": return t("track.assignment_not_assigned", "Not Assigned");
+    case "awaiting_acceptance": return t("track.assignment_awaiting", "Awaiting Acceptance");
+    case "accepted": return t("track.assignment_accepted", "Booking Accepted");
+    case "completed": return t("track.assignment_completed", "Completed");
+    case "cancelled": return t("track.assignment_cancelled", "Cancelled");
+    default: return state.assignment || "—";
+  }
+}
+
+function travelLabel(state) {
+  switch (state.travel) {
+    case "not_started": return t("track.travel_not_started", "Not Started");
+    case "not_travelling": return t("track.travel_not_yet", "Not Yet Travelling");
+    case "travelling": return t("track.travel_travelling", "Travelling to your location");
+    case "arrived": return t("track.travel_arrived", "Arrived");
+    case "in_service": return t("track.travel_in_service", "Service in Progress");
+    case "completed": return t("track.travel_completed", "Completed");
+    case "cancelled": return t("track.travel_cancelled", "Cancelled");
+    default: return state.travel || "—";
+  }
+}
+
+function employeeSummary(state) {
+  if (!state.assigned) {
+    return ["track.employee_not_assigned", "Employee has not been assigned yet."];
+  }
+  if (!state.accepted) {
+    return ["track.employee_awaiting_acceptance", "Employee assigned — waiting for them to accept the booking."];
+  }
+  switch (state.travel) {
+    case "travelling":
+      return ["track.employee_travelling", "Employee is on the way to your location."];
+    case "arrived":
+      return ["track.employee_arrived", "Employee has arrived at your location."];
+    case "in_service":
+      return ["track.employee_in_service", "The employee has arrived and your service is in progress."];
+    case "completed":
+      return ["track.employee_completed", "Service completed. Thank you for choosing PetWorld!"];
+    case "cancelled":
+      return ["track.employee_cancelled", "This booking has been cancelled."];
+    default:
+      return ["track.employee_accepted_not_travelling", "Booking accepted — employee has not started travelling yet."];
+  }
+}
+
+function badgeClass(status) {
+  if (status === "Service Completed") return "done";
+  if (status === "On the Way" || status === "Arrived" || status === "Service Started") return "live";
+  if (status === "Employee Assigned") return "accepted";
+  return "missing";
+}
+
+function renderEmployeeDetails(b) {
+  const wrap = $("employee-details");
+  const badge = $("employee-badge");
+  if (!wrap) return;
+  const state = employeeState(b);
+
+  if (badge) {
+    badge.textContent = b.status || "—";
+    badge.className = "employee-status-badge " + badgeClass(b.status);
+  }
+
+  const [summaryKey, summaryFallback] = employeeSummary(state);
+  const summary = document.createElement("p");
+  summary.className = "employee-note";
+  if (state.assigned && ["travelling", "arrived", "in_service", "completed"].includes(state.travel)) {
+    summary.classList.add("green");
+  }
+  setI18nText(summary, summaryKey, summaryFallback);
+
+  if (!state.assigned) {
+    wrap.innerHTML = "";
+    wrap.appendChild(summary);
+    return;
+  }
+
+  const rows = [
+    ["track.employee_name", "Name", b.employee_name || "—"],
+    ["track.employee_phone", "Phone", b.employee_phone || "—"],
+    ["track.employee_assignment_status", "Status", assignmentLabel(state)],
+    ["track.employee_travel_status", "Travel Status", travelLabel(state)],
+  ];
+  const grid = document.createElement("div");
+  grid.className = "employee-grid";
+  grid.innerHTML = rows
+    .map(([key, label, value]) => `<div class="detail-row"><span data-i18n="${key}">${label}</span><span>${escapeHtml(value)}</span></div>`)
+    .join("");
+
+  wrap.innerHTML = "";
+  wrap.appendChild(summary);
+  wrap.appendChild(grid);
 }
 
 async function renderTracking(d) {
   const b = d.booking;
   renderDetails(b);
   renderSteps(b.status);
-  renderBanner(d);
+  renderEmployeeDetails(b);
 
   // Resolve the customer's service location before touching the map, so a
   // manual address without coordinates can be geocoded or shown as unavailable
@@ -272,16 +383,12 @@ async function renderTracking(d) {
       const away = km < 0.05
         ? t("track.emp_at_location", "Employee is at your location")
         : t("track.emp_away", "Employee is about {km} km away").replace("{km}", km.toFixed(1));
-      $("distance-line").textContent = `${away} · ${updated}`;
+      // distance-line removed from UI
     } else {
-      $("distance-line").textContent = updated;
+      // distance-line removed from UI
     }
   } else {
-    setStatusText($("distance-line"), [
-      b.status === "Service Completed"
-        ? ["track.live_ended", "Live tracking has ended."]
-        : ["track.live_wait", "Live location will appear here once the employee starts travelling."],
-    ]);
+    // distance-line removed from UI
   }
 
   if (b.status === "Service Completed" && timer) {
@@ -294,8 +401,16 @@ async function loadTracking() {
   try {
     await renderTracking(await api(`/service-bookings/${bookingId}/tracking`));
   } catch (err) {
-    setStatusText($("banner"), [err.message]);
-    $("banner").className = "live-banner";
+    const wrap = $("employee-details");
+    if (wrap) {
+      wrap.innerHTML = `<p class="employee-note error"></p>`;
+      wrap.firstElementChild.textContent = err.message;
+    }
+    const badge = $("employee-badge");
+    if (badge) {
+      badge.textContent = "—";
+      badge.className = "employee-status-badge missing";
+    }
     if (timer) { clearInterval(timer); timer = null; }
   }
 }

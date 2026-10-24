@@ -12,8 +12,19 @@
   #map { height:400px; border-radius:16px; z-index:0; }
   .emoji-marker { font-size:32px; line-height:36px; text-align:center; background:none; border:none; }
   .panel { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:22px; }
-  .live-banner { border-radius:14px; padding:14px 16px; font-weight:700; margin-bottom:14px; background:#fff3ea; color:var(--primary-dark); }
-  .live-banner.green { background:#e6f7ee; color:#1e8449; }
+  .employee-panel { margin-bottom:18px; }
+  .employee-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .employee-head h3 { display:flex; align-items:center; gap:8px; }
+  .employee-note { border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:14px; font-weight:600; background:#fff8e1; color:#8a6d00; }
+  .employee-note.green { background:#e6f7ee; color:#1e8449; }
+  .employee-note.error { background:#fdecea; color:var(--danger); }
+  .employee-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 24px; }
+  .employee-grid .detail-row:last-child { border-bottom:none; }
+  .employee-status-badge { display:inline-block; padding:4px 11px; border-radius:20px; font-size:12px; font-weight:700; background:#fff3ea; color:var(--primary-dark); }
+  .employee-status-badge.accepted { background:#d1ecf1; color:#0c5460; }
+  .employee-status-badge.live { background:#cce5ff; color:#004085; }
+  .employee-status-badge.done { background:#c3e6cb; color:#155724; }
+  .employee-status-badge.missing { background:#eee; color:#666; }
   .steps { list-style:none; margin:6px 0 0; }
   .steps li { display:flex; align-items:center; gap:10px; padding:7px 0; font-size:14px; color:var(--text-muted); }
   .steps li .dot { width:22px; height:22px; border-radius:50%; background:#eee; display:flex; align-items:center;
@@ -28,6 +39,11 @@
   .legend { font-size:13px; color:var(--text-muted); margin-top:10px; }
   .map-message { border-radius:14px; padding:16px; margin-top:0; background:#fff8e1; color:#8a6d00;
                  font-weight:600; font-size:14px; text-align:center; }
+  @media (max-width: 620px) {
+    #map { height:300px; }
+    .employee-grid { grid-template-columns:1fr; }
+    .panel { padding:18px; }
+  }
 </style>
 </head>
 <body>
@@ -44,12 +60,16 @@
 
   <div class="cart-layout" id="track-layout">
     <div>
-      <div class="live-banner" id="banner">Loading…</div>
+      <div class="panel employee-panel">
+        <div class="employee-head">
+          <h3 data-i18n="track.employee_details">Employee Details</h3>
+          <span class="employee-status-badge missing" id="employee-badge" data-i18n="common.loading">Loading…</span>
+        </div>
+        <div id="employee-details"><div class="spinner"></div></div>
+      </div>
       <div class="panel">
         <div id="map"></div>
         <div id="map-message" class="map-message" style="display:none;"></div>
-        <p class="legend" data-i18n="track.legend">🏠 Your location &nbsp;&nbsp; 🚗 Employee location</p>
-        <p class="legend" id="distance-line"></p>
       </div>
     </div>
 
@@ -70,7 +90,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/i18n.js"></script><script src="js/api.js?v=7"></script>
-<script src="js/track-service.js?v=2"></script>
+<script src="js/track-service.js?v=3"></script>
 <script src="js/assistant.js"></script>
 </body>
 </html>
